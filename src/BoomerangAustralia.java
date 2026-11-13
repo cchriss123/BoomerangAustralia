@@ -5,6 +5,9 @@ import java.util.concurrent.*;
 
 public class BoomerangAustralia {
 
+
+    public final List<Player> players = new ArrayList<>();
+
     public static void main(String[] args) {
 
         BoomerangAustralia game = new BoomerangAustralia();
@@ -39,43 +42,54 @@ public class BoomerangAustralia {
         }
     }
 
-    public List<Player> players = new ArrayList<>();
 
+    private void addCardToDraft(Player player, Player sendToPlayer) {
+        showDraftingOptions(player);
+        String response = chooseCard(player);
+        player.draftCard(response);
 
+        sendToPlayer.nextHand.clear();
+        //pass my hand to the next player
+        sendToPlayer.nextHand.addAll(player.hand);
+    }
 
-
-    private void addCardToDraft(Player player, Player sendToPlayer){
+    private void showDraftingOptions(Player player) {
         // Print the list of cards in the draft
         if (player.draft.isEmpty()) {
             player.sendMessage("You haven't drafted any cards yet");
         } else {
             player.sendMessage("\n*****************************\nYour current draft: \n" + CardFormatter.format(player.draft));
         }
+
         if (!player.sites.isEmpty()) {
             TreeMap<String, String> sortedSites = new TreeMap<>(player.sites);
             player.sendMessage("Sites from previous rounds:\n" + sortedSites + "\n");
-
         }
+
         // Print the list of cards in the hand
         player.sendMessage("\nYour current hand: \n" + CardFormatter.format(player.hand));
+    }
+
+    private String chooseCard(Player player) {
         // Prompt the user for which cards to keep (remove from hand and add to draft)
-        player.sendMessage("Type the letter of the card to draft");
-        String response = "";
-        if (!player.isBot) {
-            response = player.readMessage();
-        } else {
+        if (player.isBot) {
             Random rnd = new Random();
-            response = player.hand.get(rnd.nextInt(player.hand.size() - 1)).letter();
+            return player.hand.get(rnd.nextInt(player.hand.size())).letter();
         }
-        for (Card c : player.hand) {
-            if (c.letter().equalsIgnoreCase(response)) {
-                player.draft.add(player.hand.remove(player.hand.indexOf(c)));
-                break;
+
+        player.sendMessage("Type the letter of the card to draft");
+
+        while (true) {
+            String response = player.readMessage();
+
+            for (Card card : player.hand) {
+                if (card.letter().equalsIgnoreCase(response)) {
+                    return response;
+                }
             }
+
+            player.sendMessage("Invalid card. Choose a card from your hand.");
         }
-        sendToPlayer.nextHand.clear();
-        //pass my hand to the next player
-        sendToPlayer.nextHand.addAll(player.hand);
     }
 
 

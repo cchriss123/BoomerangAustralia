@@ -32,6 +32,16 @@ public class Player {
         this.online = connection != null;
     }
 
+    public void draftCard(String letter) {
+        for (Card card : hand) {
+            if (card.letter().equalsIgnoreCase(letter)) {
+                hand.remove(card);
+                draft.add(card);
+                return;
+            }
+        }
+    }
+
     public void sendMessage(Object message) {
         if (isBot) {
             return;
@@ -64,26 +74,3 @@ public class Player {
 
 }
 
-//import java.util.*;
-//
-//public class Player {
-//    public final int playerID;
-//    public final boolean isBot;
-//
-//    public final List<String> region = new ArrayList<>();
-//    public final List<Card> nextHand = new ArrayList<>();
-//    public final List<Card> hand = new ArrayList<>();
-//    public final List<Card> draft = new ArrayList<>();
-//
-//    final Map<String, String> sites = new HashMap<>(); //letter, region
-//    final List<Map<String, Integer>> rScore = new ArrayList<>();
-//    final Map<String, Integer> activitiesScore = new HashMap<>();
-//
-//    public int regionRoundScore = 0;
-//    public int finalScore = 0;
-//
-//    public Player(int playerID, boolean isBot) {
-//        this.playerID = playerID;
-//        this.isBot = isBot;
-//    }
-//}
