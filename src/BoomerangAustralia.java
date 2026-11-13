@@ -7,6 +7,7 @@ public class BoomerangAustralia {
 
 
     public final List<Player> players = new ArrayList<>();
+    private final GameServer gameServer = new GameServer();
 
     public static void main(String[] args) {
 
@@ -48,47 +49,47 @@ public class BoomerangAustralia {
         String response = chooseCard(player);
         player.draftCard(response);
 
-        sendToPlayer.nextHand.clear();
+        sendToPlayer.getNextHand().clear();
         //pass my hand to the next player
-        sendToPlayer.nextHand.addAll(player.hand);
+        sendToPlayer.getNextHand().addAll(player.getHand());
     }
 
     private void showDraftingOptions(Player player) {
         // Print the list of cards in the draft
-        if (player.draft.isEmpty()) {
-            player.sendMessage("You haven't drafted any cards yet");
+        if (player.getDraft().isEmpty()) {
+            gameServer.sendMessage(player,"You haven't drafted any cards yet");
         } else {
-            player.sendMessage("\n*****************************\nYour current draft: \n" + CardFormatter.format(player.draft));
+            gameServer.sendMessage(player,"\n*****************************\nYour current draft: \n" + CardFormatter.format(player.getDraft()));
         }
 
-        if (!player.sites.isEmpty()) {
-            TreeMap<String, String> sortedSites = new TreeMap<>(player.sites);
-            player.sendMessage("Sites from previous rounds:\n" + sortedSites + "\n");
+        if (!player.getSites().isEmpty()) {
+            TreeMap<String, String> sortedSites = new TreeMap<>(player.getSites());
+            gameServer.sendMessage(player,"Sites from previous rounds:\n" + sortedSites + "\n");
         }
 
         // Print the list of cards in the hand
-        player.sendMessage("\nYour current hand: \n" + CardFormatter.format(player.hand));
+        gameServer.sendMessage(player,"\nYour current hand: \n" + CardFormatter.format(player.getHand()));
     }
 
     private String chooseCard(Player player) {
         // Prompt the user for which cards to keep (remove from hand and add to draft)
-        if (player.isBot) {
+        if (player.isBot()) {
             Random rnd = new Random();
-            return player.hand.get(rnd.nextInt(player.hand.size())).letter();
+            return player.getHand().get(rnd.nextInt(player.getHand().size())).letter();
         }
 
-        player.sendMessage("Type the letter of the card to draft");
+        gameServer.sendMessage(player,"Type the letter of the card to draft");
 
         while (true) {
-            String response = player.readMessage();
+            String response = gameServer.readMessage(player);
 
-            for (Card card : player.hand) {
+            for (Card card : player.getHand()) {
                 if (card.letter().equalsIgnoreCase(response)) {
                     return response;
                 }
             }
 
-            player.sendMessage("Invalid card. Choose a card from your hand.");
+            gameServer.sendMessage(player,"Invalid card. Choose a card from your hand.");
         }
     }
 
@@ -100,62 +101,62 @@ public class BoomerangAustralia {
 
         //Requirement 10a
         int throwCatchScore = Math.abs(
-                player.draft.get(0).number() - player.draft.get(6).number());
+                player.getDraft().get(0).number() - player.getDraft().get(6).number());
 
-        player.sendMessage("This round you scored " + throwCatchScore + " as your Throw and catch score");
+        gameServer.sendMessage(player,"This round you scored " + throwCatchScore + " as your Throw and catch score");
         score.put("Throw and Catch score", throwCatchScore);
 
         //Requirement 10b
         int thisRoundSites = 0;
-        for (Card draftCard : player.draft) {
-            if (!player.sites.containsKey(draftCard.letter())) {
+        for (Card draftCard : player.getDraft()) {
+            if (!player.getSites().containsKey(draftCard.letter())) {
                 thisRoundSites++;
-                player.sites.put(draftCard.letter(), draftCard.region());
+                player.getSites().put(draftCard.letter(), draftCard.region());
             }
         }
-        player.sendMessage("This round you scored " + thisRoundSites + " new sites points and " + player.regionRoundScore + " points for completing regions");
+        gameServer.sendMessage(player,"This round you scored " + thisRoundSites + " new sites points and " + player.getRegionRoundScore() + " points for completing regions");
         score.put("Tourist sites score", thisRoundSites);
 
         //Requirement 10c - Calculate score for Collections
-        int countRoundCollections = ScoreCalculator.calculateCollectionScore(player.draft);
-        player.sendMessage("This round you scored " + countRoundCollections + " collection points");
+        int countRoundCollections = ScoreCalculator.calculateCollectionScore(player.getDraft());
+        gameServer.sendMessage(player,"This round you scored " + countRoundCollections + " collection points");
         score.put("Collections score", countRoundCollections);
 
         //Requirement 10d Calculate score for
-        int countRoundAnimals = ScoreCalculator.calculateAnimalScore(player.draft);
-        player.sendMessage("This round you scored " + countRoundAnimals + " animal points");
+        int countRoundAnimals = ScoreCalculator.calculateAnimalScore(player.getDraft());
+        gameServer.sendMessage(player,"This round you scored " + countRoundAnimals + " animal points");
         score.put("Animals score", countRoundAnimals);
 
         //TODO refactor from
 
         //Requirement 10e Calculate score for the Activities if the player wants to score it
         String[] act = {"Indigenous Culture", "Bushwalking", "Swimming", "Sightseeing"};
-        player.sendMessage("This round you have gathered the following new activities:");
+        gameServer.sendMessage(player,"This round you have gathered the following new activities:");
         Map<String, Integer> newActivitiesMap = new LinkedHashMap<>();
         StringBuilder newActivities = new StringBuilder();
 
         for (String thisAct : act) { //Requirement 10e(ii)
-            if (!player.activitiesScore.containsKey(thisAct)) {
-                int frequency = ScoreCalculator.countMatchingCards(player.draft, thisAct, Card::activities);
+            if (!player.getActivitiesScore().containsKey(thisAct)) {
+                int frequency = ScoreCalculator.countMatchingCards(player.getDraft(), thisAct, Card::activities);
                 newActivities.append(thisAct).append("(# ").append(frequency).append(")\t");
                 newActivitiesMap.put(thisAct, frequency);
             }
         }
 
-        player.sendMessage(newActivities + "\nSelect if you wish to score one of them");
+        gameServer.sendMessage(player,newActivities + "\nSelect if you wish to score one of them");
         int countRoundActivities = 0;
         int[] scoreTable = {0, 2, 4, 7, 10, 15};
 
         for (Map.Entry<String, Integer> entry : newActivitiesMap.entrySet()) {
             int frequency = entry.getValue();
             int scoret = (frequency > 0) ? scoreTable[frequency - 1] : 0;
-            player.sendMessage("Want to keep " + entry.getKey() + "(" + entry.getValue()
+            gameServer.sendMessage(player,"Want to keep " + entry.getKey() + "(" + entry.getValue()
                     + ") [" + scoret + " points]? (Y/N)");
-            String response = player.isBot ? "Y" : player.readMessage();
+            String response = player.isBot() ? "Y" : gameServer.readMessage(player);
 
             if (response.equalsIgnoreCase("Y")) {
-                player.activitiesScore.put(entry.getKey(), scoret);
-                player.sendMessage("This round you scored this activity: "
+                player.getActivitiesScore().put(entry.getKey(), scoret);
+                gameServer.sendMessage(player,"This round you scored this activity: "
                         + entry.getKey() + "[" + scoret + " points]");
                 //We do not need to add the Activity score to the score variable, since it's stored separately in the activitiesScore hashmap
                 countRoundActivities = scoret;
@@ -164,24 +165,24 @@ public class BoomerangAustralia {
         }
 
         //TODO refactor from
-        player.rScore.add(score);
+        player.getRScore().add(score);
 
         if (roundNr == 3) {//last round
-            int regionBonus = player.region.size() * 3;
+            int regionBonus = player.getRegion().size() * 3;
             int totalScore = ScoreCalculator.calculateFinalScore(
-                    player.rScore, player.activitiesScore, regionBonus);
+                    player.getRScore(), player.getActivitiesScore(), regionBonus);
 
             //Requirement 12
             String scoreboard = ScoreFormatter.format(
-                    player.rScore, player.activitiesScore, regionBonus);
-            player.sendMessage("\n*********************************************\n" + scoreboard);
+                    player.getRScore(), player.getActivitiesScore(), regionBonus);
+            gameServer.sendMessage(player,"\n*********************************************\n" + scoreboard);
             return totalScore;
         }
 
-        int totalRoundScore = player.regionRoundScore + throwCatchScore + thisRoundSites
+        int totalRoundScore = player.getRegionRoundScore() + throwCatchScore + thisRoundSites
                 + countRoundCollections + countRoundAnimals + countRoundActivities;
 
-        player.regionRoundScore = 0; //it has been added to the region list, and will be summed up at the end of the 4 rounds.
+        player.setRegionRoundScore(0); //it has been added to the region list, and will be summed up at the end of the 4 rounds.
         return totalRoundScore;
     }
 
@@ -201,11 +202,11 @@ public class BoomerangAustralia {
             List<Card> deck = DeckFactory.createDeck();  //Requirement 2
 
             Collections.shuffle(deck); //Requirement 3
-            server(numPlayers, numBots);
+            initializePlayers(numPlayers, numBots);
             //Requirement 4
             for (Player player : players) {
                 for (int i = 0; i < 7; i++) {
-                    player.hand.add(deck.removeFirst());
+                    player.getHand().add(deck.removeFirst());
                 }
             }
             //Requirement 12 - play 4 rounds
@@ -235,17 +236,17 @@ public class BoomerangAustralia {
                     }
 
                     for (Player sendToPlayer : players) {
-                        sendToPlayer.hand.clear();
+                        sendToPlayer.getHand().clear();
                         // grab the cards passed on from the previous player
-                        sendToPlayer.hand.addAll(sendToPlayer.nextHand);
+                        sendToPlayer.getHand().addAll(sendToPlayer.getNextHand());
                     }
                     // Requirement 5 (Keep throw card hidden)
                     if (i > 0) {
                         // Requirement 7 (Show cards)
                         for (int pID = 0; pID < players.size(); pID++) {
                             for (Player sendToPlayer : players) {
-                                Player id = players.get(pID);
-                                sendToPlayer.sendMessage("\nPlayer " + pID + " has drafted\n" + CardFormatter.format(id.draft.subList(1, id.draft.size())));
+                                Player draftedPlayer = players.get(pID);
+                                gameServer.sendMessage(sendToPlayer, "\nPlayer " + pID + " has drafted\n" + CardFormatter.format(draftedPlayer.getDraft().subList(1, draftedPlayer.getDraft().size())));
                             }
                         }
                     }
@@ -256,9 +257,9 @@ public class BoomerangAustralia {
                     boolean regionComplete = false;
                     for (Player player : players) {
                         if (!finishedRegions.contains(regions[r]) &&
-                                RegionChecker.isRegionComplete(regions[r], player.sites, player.draft)) {
-                            player.region.add(regions[r]);
-                            player.regionRoundScore += 3;
+                                RegionChecker.isRegionComplete(regions[r], player.getSites(), player.getDraft())) {
+                            player.getRegion().add(regions[r]);
+                            player.setRegionRoundScore(player.getRegionRoundScore() + 3);
                             regionComplete = true;
                         }
                     }
@@ -268,35 +269,37 @@ public class BoomerangAustralia {
                 }
 
                 for (Player player : players) {
-                    player.draft.add(player.hand.removeFirst()); //Requirement 9 - last card on hand is added to draft
+                    player.getDraft().add(player.getHand().removeFirst()); //Requirement 9 - last card on hand is added to draft
                     //Requirement 10 - scoring
-                    player.sendMessage("********************************\nYour draft this round: \n" + CardFormatter.format(player.draft) + "\n");
-                    player.finalScore = roundScore(player, round);
-                    player.sendMessage("The following regions have now been completed: " + finishedRegions);
+                    gameServer.sendMessage(player,"********************************\nYour draft this round: \n" + CardFormatter.format(player.getDraft()) + "\n");
+                    player.setFinalScore(roundScore(player, round));
+                    gameServer.sendMessage(player,"The following regions have now been completed: " + finishedRegions);
                 }
 
                 deck = DeckFactory.createDeck(); //Requirement 11 & Requirement 2
                 Collections.shuffle(deck); //Requirement 3
                 //Requirement 4
                 for (Player player : players) {
-                    player.draft.clear();
-                    player.hand.clear();
+                    player.getDraft().clear();
+                    player.getHand().clear();
                     for (int i = 0; i < 7; i++) {
-                        player.hand.add(deck.removeFirst());
+                        player.getHand().add(deck.removeFirst());
                     }
                 }
             }
             Player highScore = players.getFirst();
             for (Player player : players) {
-                if (player.finalScore > highScore.finalScore) {
+                if (player.getFinalScore() > highScore.getFinalScore()) {
                     highScore = player;
                 }
             }
             for (Player player : players) {
-                player.sendMessage("The winner is player: " + players.indexOf(highScore) + " with " + highScore.finalScore + " points");
+                gameServer.sendMessage(player,"The winner is player: " + players.indexOf(highScore) + " with " + highScore.getFinalScore() + " points");
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());
+        } finally {
+            gameServer.closeConnections();
         }
     }
 
@@ -325,34 +328,16 @@ public class BoomerangAustralia {
         }
     }
 
-    public void server(int numberPlayers, int numberOfBots) throws IOException {
-
-        players.add(new Player(0, false, null, null, null));
+    public void initializePlayers(int numberPlayers, int numberOfBots) throws IOException {
+        players.add(new Player(0, false));
 
         for (int i = 0; i < numberOfBots; i++) {
-            players.add(new Player(i + 1, true, null, null, null));
+            players.add(new Player(i + 1, true));
         }
 
-        // No remote players? No server socket needed.
-        if (numberPlayers <= 1) {
-            return;
-        }
-
-        try (ServerSocket serverSocket = new ServerSocket(2048)) {
-            for (int i = numberOfBots + 1; i < numberPlayers + numberOfBots; i++) {
-                Socket connectionSocket = serverSocket.accept();
-
-                ObjectInputStream inFromClient = new ObjectInputStream(connectionSocket.getInputStream());
-
-                ObjectOutputStream outToClient = new ObjectOutputStream(connectionSocket.getOutputStream());
-
-                players.add(new Player(i, false, connectionSocket, inFromClient, outToClient));
-
-                System.out.println("Connected to player " + i);
-                outToClient.writeObject("You connected to the server as player " + i + "\n");
-            }
-        }
+        gameServer.acceptPlayers(players, numberPlayers, numberOfBots);
     }
 }
+
 
 

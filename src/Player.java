@@ -1,35 +1,22 @@
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.Socket;
+
 import java.util.*;
 
 public class Player {
-    public int playerID;
-    public boolean online;
-    public boolean isBot;
-    public Socket connection;
-    public ObjectInputStream inFromClient;
-    public ObjectOutputStream outToClient;
-    public List<String> region = new ArrayList<>();
-    Scanner scanner = new Scanner(System.in);
-    public List<Card> nextHand = new ArrayList<>();
-    public List<Card> hand = new ArrayList<>();
-    public List<Card> draft = new ArrayList<>();
-    HashMap<String, String> sites = new HashMap<>(); //letter, region
-    List<Map<String, Integer>> rScore = new ArrayList<>();
-    HashMap<String, Integer> activitiesScore = new HashMap<>();
-    public int regionRoundScore = 0;
-    public int finalScore = 0;
+    private final int playerID;
+    private final boolean isBot;
+    private final List<String> region = new ArrayList<>();
+    private final List<Card> nextHand = new ArrayList<>();
+    private final List<Card> hand = new ArrayList<>();
+    private final List<Card> draft = new ArrayList<>();
+    private final Map<String, String> sites = new HashMap<>(); //letter, region
+    private final List<Map<String, Integer>> rScore = new ArrayList<>();
+    private final Map<String, Integer> activitiesScore = new HashMap<>();
+    private int regionRoundScore = 0;
+    private int finalScore = 0;
 
-
-    public Player(int playerID, boolean isBot, Socket connection, ObjectInputStream inFromClient, ObjectOutputStream outToClient) {
+    public Player(int playerID, boolean isBot) {
         this.playerID = playerID;
-        this.connection = connection;
-        this.inFromClient = inFromClient;
-        this.outToClient = outToClient;
         this.isBot = isBot;
-        this.online = connection != null;
     }
 
     public void draftCard(String letter) {
@@ -42,35 +29,57 @@ public class Player {
         }
     }
 
-    public void sendMessage(Object message) {
-        if (isBot) {
-            return;
-        }
+    // Getters and setters
 
-        if (!online) {
-            System.out.println(message);
-            return;
-        }
-
-        try {
-            outToClient.writeObject(message);
-        } catch (IOException e) {
-            System.err.println("Failed to send message: " + e.getMessage());
-        }
+    public int getPlayerID() {
+        return playerID;
     }
 
-    public String readMessage() {
-        if (!online) return scanner.nextLine();
-
-        try {
-            return (String) inFromClient.readObject();
-
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Failed to read message: " + e.getMessage());
-            return "";
-        }
+    public boolean isBot() {
+        return isBot;
     }
 
+    public List<String> getRegion() {
+        return region;
+    }
 
+    public List<Card> getNextHand() {
+        return nextHand;
+    }
+
+    public List<Card> getHand() {
+        return hand;
+    }
+
+    public List<Card> getDraft() {
+        return draft;
+    }
+
+    public Map<String, String> getSites() {
+        return sites;
+    }
+
+    public List<Map<String, Integer>> getRScore() {
+        return rScore;
+    }
+
+    public Map<String, Integer> getActivitiesScore() {
+        return activitiesScore;
+    }
+
+    public int getRegionRoundScore() {
+        return regionRoundScore;
+    }
+
+    public void setRegionRoundScore(int regionRoundScore) {
+        this.regionRoundScore = regionRoundScore;
+    }
+
+    public int getFinalScore() {
+        return finalScore;
+    }
+
+    public void setFinalScore(int finalScore) {
+        this.finalScore = finalScore;
+    }
 }
-
