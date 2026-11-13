@@ -41,6 +41,45 @@ public class BoomerangAustralia {
 
     public List<Player> players = new ArrayList<>();
 
+
+
+
+    private void addCardToDraft(Player player, Player sendToPlayer){
+        // Print the list of cards in the draft
+        if (player.draft.isEmpty()) {
+            player.sendMessage("You haven't drafted any cards yet");
+        } else {
+            player.sendMessage("\n*****************************\nYour current draft: \n" + CardFormatter.format(player.draft));
+        }
+        if (!player.sites.isEmpty()) {
+            TreeMap<String, String> sortedSites = new TreeMap<>(player.sites);
+            player.sendMessage("Sites from previous rounds:\n" + sortedSites + "\n");
+
+        }
+        // Print the list of cards in the hand
+        player.sendMessage("\nYour current hand: \n" + CardFormatter.format(player.hand));
+        // Prompt the user for which cards to keep (remove from hand and add to draft)
+        player.sendMessage("Type the letter of the card to draft");
+        String response = "";
+        if (!player.isBot) {
+            response = player.readMessage();
+        } else {
+            Random rnd = new Random();
+            response = player.hand.get(rnd.nextInt(player.hand.size() - 1)).letter();
+        }
+        for (Card c : player.hand) {
+            if (c.letter().equalsIgnoreCase(response)) {
+                player.draft.add(player.hand.remove(player.hand.indexOf(c)));
+                break;
+            }
+        }
+        sendToPlayer.nextHand.clear();
+        //pass my hand to the next player
+        sendToPlayer.nextHand.addAll(player.hand);
+    }
+
+
+
     private int roundScore(Player player, int roundNr) {
         HashMap<String, Integer> score = new HashMap<>();
         //Fix total score and round score... Also, sum up the round score according to the scoring sheet
@@ -171,7 +210,7 @@ public class BoomerangAustralia {
                             sendHand = (p > 0) ? players.get(p - 1) : players.getLast();
                         }
                         //Requirement 7 - Make sure every player can draft their card at the same time
-                        Runnable task = () -> players.get(currentPlayerIndex).addCardToDraft(sendHand);
+                        Runnable task = () -> addCardToDraft(players.get(currentPlayerIndex), sendHand);
                         threadpool.execute(task);
                     }
                     threadpool.shutdown();

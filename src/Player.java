@@ -61,37 +61,29 @@ public class Player {
         }
     }
 
-    public void addCardToDraft(Player sendToPlayer) {
-        // Print the list of cards in the draft
-        if (draft.isEmpty()) {
-            sendMessage("You haven't drafted any cards yet");
-        } else {
-            sendMessage("\n*****************************\nYour current draft: \n" + CardFormatter.format(draft));
-        }
-        if (!sites.isEmpty()) {
-            TreeMap<String, String> sortedSites = new TreeMap<>(sites);
-            sendMessage("Sites from previous rounds:\n" + sortedSites + "\n");
 
-        }
-        // Print the list of cards in the hand
-        sendMessage("\nYour current hand: \n" + CardFormatter.format(hand));
-        // Prompt the user for which cards to keep (remove from hand and add to draft)
-        sendMessage("Type the letter of the card to draft");
-        String response = "";
-        if (!isBot) {
-            response = readMessage();
-        } else {
-            Random rnd = new Random();
-            response = hand.get(rnd.nextInt(hand.size() - 1)).letter();
-        }
-        for (Card c : hand) {
-            if (c.letter().equalsIgnoreCase(response)) {
-                draft.add(hand.remove(hand.indexOf(c)));
-                break;
-            }
-        }
-        sendToPlayer.nextHand.clear();
-        //pass my hand to the next player
-        sendToPlayer.nextHand.addAll(hand);
-    }
 }
+
+//import java.util.*;
+//
+//public class Player {
+//    public final int playerID;
+//    public final boolean isBot;
+//
+//    public final List<String> region = new ArrayList<>();
+//    public final List<Card> nextHand = new ArrayList<>();
+//    public final List<Card> hand = new ArrayList<>();
+//    public final List<Card> draft = new ArrayList<>();
+//
+//    final Map<String, String> sites = new HashMap<>(); //letter, region
+//    final List<Map<String, Integer>> rScore = new ArrayList<>();
+//    final Map<String, Integer> activitiesScore = new HashMap<>();
+//
+//    public int regionRoundScore = 0;
+//    public int finalScore = 0;
+//
+//    public Player(int playerID, boolean isBot) {
+//        this.playerID = playerID;
+//        this.isBot = isBot;
+//    }
+//}
