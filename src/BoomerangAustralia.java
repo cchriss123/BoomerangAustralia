@@ -1,6 +1,5 @@
 import java.util.*;
 import java.io.*;
-import java.net.*;
 import java.util.concurrent.*;
 
 public class BoomerangAustralia {
@@ -25,7 +24,7 @@ public class BoomerangAustralia {
         try {
 
             if (args.length == 1) {
-                game.client(args[0]);
+                game.gameServer.client(args[0]);
                 return;
             }
 
@@ -164,7 +163,7 @@ public class BoomerangAustralia {
             }
         }
 
-        //TODO refactor from
+        //TODO refactor to
         player.getRScore().add(score);
 
         if (roundNr == 3) {//last round
@@ -303,30 +302,6 @@ public class BoomerangAustralia {
         }
     }
 
-    public void client(String ipAddress) {
-        try (Socket socket = new Socket(ipAddress, 2048);
-             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-             ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
-
-            Scanner scanner = new Scanner(System.in);
-            String message = "";
-
-            while (!message.contains("winner")) {
-                message = (String) in.readObject();
-                System.out.println(message);
-
-                if (message.contains("Type") || message.contains("keep")) {
-                    out.writeObject(scanner.nextLine());
-                }
-            }
-
-        } catch (IOException e) {
-            System.err.println("Connection error: " + e.getMessage());
-
-        } catch (ClassNotFoundException e) {
-            System.err.println("Unknown message type: " + e.getMessage());
-        }
-    }
 
     public void initializePlayers(int numberPlayers, int numberOfBots) throws IOException {
         players.add(new Player(0, false));

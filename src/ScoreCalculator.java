@@ -43,7 +43,6 @@ public final class ScoreCalculator {
 
             total += points;
         }
-
         return total;
     }
 

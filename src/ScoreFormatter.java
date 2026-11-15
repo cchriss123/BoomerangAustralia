@@ -17,16 +17,13 @@ public final class ScoreFormatter {
                 "Animals score"
         );
 
-        String[] act = {
-                "Indigenous Culture", "Bushwalking",
-                "Swimming", "Sightseeing"
-        };
+        String[] act = {"Indigenous Culture", "Bushwalking", "Swimming", "Sightseeing"};
 
         //Requirement 12
         StringBuilder scoreboard = new StringBuilder();
 
-        scoreboard.append(String.format("%-25s %8s %8s %8s %8s %8s%n",
-                "Category", "Round 1", "Round 2", "Round 3", "Round 4", "Total"));
+        scoreboard.append(String.format
+                ("%-25s %8s %8s %8s %8s %8s%n", "Category", "Round 1", "Round 2", "Round 3", "Round 4", "Total"));
 
         for (String category : categories) {
             scoreboard.append(String.format("%-25s", category));
@@ -39,9 +36,7 @@ public final class ScoreFormatter {
             scoreboard.append(String.format(" %8d%n", categoryTotal));
         }
 
-        scoreboard.append(String.format("%-25s %8s %8s %8s %8s %8s%n",
-                "", "IndC", "Bushw", "Swim", "Sights", "Total"));
-
+        scoreboard.append(String.format("%-25s %8s %8s %8s %8s %8s%n", "", "IndC", "Bushw", "Swim", "Sights", "Total"));
         scoreboard.append(String.format("%-25s", "Activities score"));
 
         int totalAct = 0;
@@ -52,14 +47,11 @@ public final class ScoreFormatter {
         }
 
         scoreboard.append(String.format(" %8d%n", totalAct));
-        scoreboard.append(String.format("%-25s %8d%n",
-                "Region bonuses", regionBonus));
+        scoreboard.append(String.format("%-25s %8d%n", "Region bonuses", regionBonus));
 
-        int totalScore = ScoreCalculator.calculateFinalScore(
-                rScore, activitiesScore, regionBonus);
+        int totalScore = ScoreCalculator.calculateFinalScore(rScore, activitiesScore, regionBonus);
 
-        scoreboard.append(String.format("%-25s %8d points%n",
-                "Total score", totalScore));
+        scoreboard.append(String.format("%-25s %8d points%n", "Total score", totalScore));
 
         return scoreboard.toString();
     }

@@ -4,10 +4,7 @@ public final class RegionChecker {
 
     private RegionChecker() {}
 
-    public static boolean isRegionComplete(
-            String region,
-            Map<String, String> sites,
-            List<Card> draft) {
+    public static boolean isRegionComplete(String region, Map<String, String> sites, List<Card> draft) {
 
         Set<String> collectedSites = new HashSet<>();
 
