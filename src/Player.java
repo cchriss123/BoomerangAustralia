@@ -29,6 +29,19 @@ public class Player {
         }
     }
 
+    public int countNewSites() {
+        int thisRoundSites = 0;
+
+        for (Card draftCard : draft) {
+            if (!sites.containsKey(draftCard.letter())) {
+                thisRoundSites++;
+                sites.put(draftCard.letter(), draftCard.region());
+            }
+        }
+
+        return thisRoundSites;
+    }
+
     // Getters and setters
 
     public int getPlayerID() {
@@ -82,4 +95,6 @@ public class Player {
     public void setFinalScore(int finalScore) {
         this.finalScore = finalScore;
     }
+
+
 }

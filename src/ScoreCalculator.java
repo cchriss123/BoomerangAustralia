@@ -71,6 +71,11 @@ public final class ScoreCalculator {
         return totalScore;
     }
 
+    public static int calculateActivityScore(int frequency) {
+        int[] scoreTable = {0, 2, 4, 7, 10, 15};
+        return (frequency > 0) ? scoreTable[frequency - 1] : 0;
+    }
+
 
 
 

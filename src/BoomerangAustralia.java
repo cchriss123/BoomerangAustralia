@@ -73,8 +73,9 @@ public class BoomerangAustralia {
     private String chooseCard(Player player) {
         // Prompt the user for which cards to keep (remove from hand and add to draft)
         if (player.isBot()) {
-            Random rnd = new Random();
-            return player.getHand().get(rnd.nextInt(player.getHand().size())).letter();
+            return player.getHand()
+                    .get(ThreadLocalRandom.current().nextInt(player.getHand().size()))
+                    .letter();
         }
 
         gameServer.sendMessage(player,"Type the letter of the card to draft");
@@ -94,96 +95,110 @@ public class BoomerangAustralia {
 
 
 
+
     private int roundScore(Player player, int roundNr) {
         HashMap<String, Integer> score = new HashMap<>();
         //Fix total score and round score... Also, sum up the round score according to the scoring sheet
 
         //Requirement 10a
-        int throwCatchScore = Math.abs(
-                player.getDraft().get(0).number() - player.getDraft().get(6).number());
+        int firstCardNumber = player.getDraft().get(0).number();
+        int lastCardNumber = player.getDraft().get(6).number();
+        int throwCatchScore = Math.abs(firstCardNumber - lastCardNumber);
 
-        gameServer.sendMessage(player,"This round you scored " + throwCatchScore + " as your Throw and catch score");
+        gameServer.sendMessage(player, "This round you scored %d as your Throw and catch score".formatted(throwCatchScore));
         score.put("Throw and Catch score", throwCatchScore);
 
         //Requirement 10b
-        int thisRoundSites = 0;
-        for (Card draftCard : player.getDraft()) {
-            if (!player.getSites().containsKey(draftCard.letter())) {
-                thisRoundSites++;
-                player.getSites().put(draftCard.letter(), draftCard.region());
-            }
-        }
-        gameServer.sendMessage(player,"This round you scored " + thisRoundSites + " new sites points and " + player.getRegionRoundScore() + " points for completing regions");
+        int thisRoundSites = player.countNewSites();
+        gameServer.sendMessage(player, "This round you scored %d new sites points and %d points for completing regions"
+                .formatted(thisRoundSites, player.getRegionRoundScore()));
         score.put("Tourist sites score", thisRoundSites);
 
         //Requirement 10c - Calculate score for Collections
         int countRoundCollections = ScoreCalculator.calculateCollectionScore(player.getDraft());
-        gameServer.sendMessage(player,"This round you scored " + countRoundCollections + " collection points");
+        gameServer.sendMessage(player, "This round you scored %d collection points".formatted(countRoundCollections));
         score.put("Collections score", countRoundCollections);
 
         //Requirement 10d Calculate score for
         int countRoundAnimals = ScoreCalculator.calculateAnimalScore(player.getDraft());
-        gameServer.sendMessage(player,"This round you scored " + countRoundAnimals + " animal points");
+        gameServer.sendMessage(player, "This round you scored %d animal points".formatted(countRoundAnimals));
         score.put("Animals score", countRoundAnimals);
 
-        //TODO refactor from
-
         //Requirement 10e Calculate score for the Activities if the player wants to score it
-        String[] act = {"Indigenous Culture", "Bushwalking", "Swimming", "Sightseeing"};
-        gameServer.sendMessage(player,"This round you have gathered the following new activities:");
-        Map<String, Integer> newActivitiesMap = new LinkedHashMap<>();
-        StringBuilder newActivities = new StringBuilder();
+        Map<String, Integer> newActivitiesMap = getAvailableActivities(player);
+        gameServer.sendMessage(player, "This round you have gathered the following new activities:");
+        gameServer.sendMessage(player, "%s\nSelect if you wish to score one of them"
+                .formatted(ActivityFormatter.format(newActivitiesMap)));
 
-        for (String thisAct : act) { //Requirement 10e(ii)
-            if (!player.getActivitiesScore().containsKey(thisAct)) {
-                int frequency = ScoreCalculator.countMatchingCards(player.getDraft(), thisAct, Card::activities);
-                newActivities.append(thisAct).append("(# ").append(frequency).append(")\t");
-                newActivitiesMap.put(thisAct, frequency);
-            }
-        }
-
-        gameServer.sendMessage(player,newActivities + "\nSelect if you wish to score one of them");
         int countRoundActivities = 0;
-        int[] scoreTable = {0, 2, 4, 7, 10, 15};
-
-        for (Map.Entry<String, Integer> entry : newActivitiesMap.entrySet()) {
-            int frequency = entry.getValue();
-            int scoret = (frequency > 0) ? scoreTable[frequency - 1] : 0;
-            gameServer.sendMessage(player,"Want to keep " + entry.getKey() + "(" + entry.getValue()
-                    + ") [" + scoret + " points]? (Y/N)");
+        for (Map.Entry<String, Integer> activity : newActivitiesMap.entrySet()) {
+            int frequency = activity.getValue();
+            int scoret = ScoreCalculator.calculateActivityScore(frequency);
+            gameServer.sendMessage(player, "Want to keep %s(%d) [%d points]? (Y/N)"
+                    .formatted(activity.getKey(), activity.getValue(), scoret));
             String response = player.isBot() ? "Y" : gameServer.readMessage(player);
 
             if (response.equalsIgnoreCase("Y")) {
-                player.getActivitiesScore().put(entry.getKey(), scoret);
-                gameServer.sendMessage(player,"This round you scored this activity: "
-                        + entry.getKey() + "[" + scoret + " points]");
+                player.getActivitiesScore().put(activity.getKey(), scoret);
+                gameServer.sendMessage(player, "This round you scored this activity: %s[%d points]"
+                        .formatted(activity.getKey(), scoret));
                 //We do not need to add the Activity score to the score variable, since it's stored separately in the activitiesScore hashmap
                 countRoundActivities = scoret;
                 break; //Requirement 10e(i) exit the loop since you are only allowed to score one activity per round
             }
         }
 
-        //TODO refactor to
         player.getRScore().add(score);
 
         if (roundNr == 3) {//last round
-            int regionBonus = player.getRegion().size() * 3;
-            int totalScore = ScoreCalculator.calculateFinalScore(
-                    player.getRScore(), player.getActivitiesScore(), regionBonus);
-
-            //Requirement 12
-            String scoreboard = ScoreFormatter.format(
-                    player.getRScore(), player.getActivitiesScore(), regionBonus);
-            gameServer.sendMessage(player,"\n*********************************************\n" + scoreboard);
-            return totalScore;
+            return finalScore(player);
         }
 
-        int totalRoundScore = player.getRegionRoundScore() + throwCatchScore + thisRoundSites
-                + countRoundCollections + countRoundAnimals + countRoundActivities;
+        int totalRoundScore = player.getRegionRoundScore()
+                + throwCatchScore
+                + thisRoundSites
+                + countRoundCollections
+                + countRoundAnimals
+                + countRoundActivities;
 
         player.setRegionRoundScore(0); //it has been added to the region list, and will be summed up at the end of the 4 rounds.
         return totalRoundScore;
     }
+
+    private Map<String, Integer> getAvailableActivities(Player player) {
+        String[] act = {"Indigenous Culture", "Bushwalking", "Swimming", "Sightseeing"};
+        Map<String, Integer> newActivitiesMap = new LinkedHashMap<>();
+
+        for (String thisAct : act) { //Requirement 10e(ii)
+            if (!player.getActivitiesScore().containsKey(thisAct)) {
+                int frequency = ScoreCalculator.countMatchingCards(
+                        player.getDraft(), thisAct, Card::activities);
+
+                newActivitiesMap.put(thisAct, frequency);
+            }
+        }
+
+        return newActivitiesMap;
+    }
+
+    private int finalScore(Player player) {
+        int regionBonus = player.getRegion().size() * 3;
+        int totalScore = ScoreCalculator.calculateFinalScore(
+                player.getRScore(), player.getActivitiesScore(), regionBonus);
+
+        //Requirement 12
+        String scoreboard = ScoreFormatter.format(
+                player.getRScore(), player.getActivitiesScore(), regionBonus);
+        gameServer.sendMessage(player, "\n*********************************************\n" + scoreboard);
+
+        return totalScore;
+    }
+
+
+
+
+
+
 
 
 
