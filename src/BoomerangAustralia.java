@@ -61,16 +61,19 @@ public class BoomerangAustralia {
         if (player.getDraft().isEmpty()) {
             gameServer.sendMessage(player, "You haven't drafted any cards yet");
         } else {
-            gameServer.sendMessage(player, "\n*****************************\nYour current draft: \n" + GameFormatter.formatCards(player.getDraft()));
+            gameServer.sendMessage(player, "%n********************************%nYour current draft: %n%s"
+                    .formatted(GameFormatter.formatCards(player.getDraft())));
         }
 
         if (!player.getSites().isEmpty()) {
             TreeMap<String, String> sortedSites = new TreeMap<>(player.getSites());
-            gameServer.sendMessage(player, "Sites from previous rounds:\n" + sortedSites + "\n");
+            gameServer.sendMessage(player, "Sites from previous rounds:%n%s%n"
+                    .formatted(sortedSites));
         }
 
         // Print the list of cards in the hand
-        gameServer.sendMessage(player, "\nYour current hand: \n" + GameFormatter.formatCards(player.getHand()));
+        gameServer.sendMessage(player, "%nYour current hand: %n%s"
+                .formatted(GameFormatter.formatCards(player.getHand())));
     }
 
     private String chooseCard(Player player) {
@@ -232,11 +235,8 @@ public class BoomerangAustralia {
             dealCards(deck);
             //Requirement 12 - play 4 rounds
             for (int round = 0; round < 4; round++) { //Requirement 11
-                //Draft 6 cards, the 7th card is sent to the previous player's hand
                 draftRound();
-                // Check if I'm the first to complete a region, add regionBonusScore if that's the case
-                //Requirement 10b(i+ii)
-                checkCompletedRegions(regions, finishedRegions);
+                checkCompletedRegions(regions, finishedRegions); //Requirement 10b(i+ii)
                 scorePlayers(round, finishedRegions); //Requirement 9 & 10
                 deck = DeckFactory.createDeck(); //Requirement 11 & Requirement 2
                 Collections.shuffle(deck); //Requirement 3
@@ -250,8 +250,10 @@ public class BoomerangAustralia {
             Player highScore = ScoreCalculator.getHighestScoringPlayer(players);
 
             for (Player player : players) {
-                gameServer.sendMessage(player, "The winner is player: " + players.indexOf(highScore) + " with " + highScore.getFinalScore() + " points");
+                gameServer.sendMessage(player, "The winner is player: %d with %d points"
+                        .formatted(players.indexOf(highScore), highScore.getFinalScore()));
             }
+
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             System.out.println(e.getMessage());
@@ -314,12 +316,17 @@ public class BoomerangAustralia {
 
     private void showDraftedCards() {
         // Requirement 7 (Show cards)
-        for (int pID = 0; pID < players.size(); pID++) {
-            Player draftedPlayer = players.get(pID);
+        for (int i = 0; i < players.size(); i++) {
+            Player draftedPlayer = players.get(i);
+
+            List<Card> visibleCards = draftedPlayer.getDraft()
+                    .subList(1, draftedPlayer.getDraft().size());
+
+            String formattedCards = GameFormatter.formatCards(visibleCards);
 
             for (Player sendToPlayer : players) {
-                gameServer.sendMessage(sendToPlayer, "\nmodel.Player " + pID + " has drafted\n"
-                        + GameFormatter.formatCards(draftedPlayer.getDraft().subList(1, draftedPlayer.getDraft().size())));
+                gameServer.sendMessage(sendToPlayer, "%nPlayer %d has drafted%n%s"
+                        .formatted(i, formattedCards));
             }
         }
     }
@@ -358,16 +365,14 @@ public class BoomerangAustralia {
             player.getDraft().add(player.getHand().removeFirst()); //Requirement 9 - last card on hand is added to draft
 
             //Requirement 10 - scoring
-            gameServer.sendMessage(player, "********************************\nYour draft this round: \n"
-                    + GameFormatter.formatCards(player.getDraft()) + "\n");
+            gameServer.sendMessage(player, """
+                ********************************
+                Your draft this round:
+                """ + GameFormatter.formatCards(player.getDraft()) + "\n");
 
             player.setFinalScore(roundScore(player, round));
 
             gameServer.sendMessage(player, "The following regions have now been completed: " + finishedRegions);
         }
     }
-
-
 }
-
-
