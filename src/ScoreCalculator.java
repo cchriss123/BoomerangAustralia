@@ -83,9 +83,17 @@ public final class ScoreCalculator {
         return totalScore;
     }
 
+    private static final Map<Integer, Integer> ACTIVITY_POINTS_BY_FREQUENCY = Map.of(
+            1, 0,
+            2, 2,
+            3, 4,
+            4, 7,
+            5, 10,
+            6, 15
+    );
+
     public static int calculateActivityScore(int frequency) {
-        int[] scoreTable = {0, 2, 4, 7, 10, 15};
-        return (frequency > 0) ? scoreTable[frequency - 1] : 0;
+        return ACTIVITY_POINTS_BY_FREQUENCY.getOrDefault(frequency, 0);
     }
 
     public static Player getHighestScoringPlayer(List<Player> players) {
