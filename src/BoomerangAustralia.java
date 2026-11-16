@@ -1,12 +1,16 @@
+import model.Card;
+import model.Player;
+
 import java.util.*;
 import java.io.*;
 import java.util.concurrent.*;
 
 public class BoomerangAustralia {
 
-
     public final List<Player> players = new ArrayList<>();
     private final GameServer gameServer = new GameServer();
+    private static final int CARDS_PER_HAND = 7;
+    private static final int DRAFTING_TURNS = CARDS_PER_HAND - 1;
 
     public static void main(String[] args) {
 
@@ -14,10 +18,10 @@ public class BoomerangAustralia {
 
         if (args.length != 1 && args.length != 2) {
             System.out.println("""
-            This game is for a total of 2-4 players/bots
-            Server syntax: java BoomerangAustralia numPlayers numBots
-            Client syntax: java BoomerangAustralia IP
-            """);
+                    This game is for a total of 2-4 players/bots
+                    Server syntax: java BoomerangAustralia numPlayers numBots
+                    Client syntax: java BoomerangAustralia IP
+                    """);
             return;
         }
 
@@ -38,10 +42,9 @@ public class BoomerangAustralia {
 
             game.initGame(numPlayers, numBots);
         } catch (NumberFormatException _) {
-            System.err.println("Player counts must be valid integers.");
+            System.err.println("model.Player counts must be valid integers.");
         }
     }
-
 
     private void addCardToDraft(Player player, Player sendToPlayer) {
         showDraftingOptions(player);
@@ -56,18 +59,18 @@ public class BoomerangAustralia {
     private void showDraftingOptions(Player player) {
         // Print the list of cards in the draft
         if (player.getDraft().isEmpty()) {
-            gameServer.sendMessage(player,"You haven't drafted any cards yet");
+            gameServer.sendMessage(player, "You haven't drafted any cards yet");
         } else {
-            gameServer.sendMessage(player,"\n*****************************\nYour current draft: \n" + CardFormatter.format(player.getDraft()));
+            gameServer.sendMessage(player, "\n*****************************\nYour current draft: \n" + GameFormatter.formatCards(player.getDraft()));
         }
 
         if (!player.getSites().isEmpty()) {
             TreeMap<String, String> sortedSites = new TreeMap<>(player.getSites());
-            gameServer.sendMessage(player,"Sites from previous rounds:\n" + sortedSites + "\n");
+            gameServer.sendMessage(player, "Sites from previous rounds:\n" + sortedSites + "\n");
         }
 
         // Print the list of cards in the hand
-        gameServer.sendMessage(player,"\nYour current hand: \n" + CardFormatter.format(player.getHand()));
+        gameServer.sendMessage(player, "\nYour current hand: \n" + GameFormatter.formatCards(player.getHand()));
     }
 
     private String chooseCard(Player player) {
@@ -78,7 +81,7 @@ public class BoomerangAustralia {
                     .letter();
         }
 
-        gameServer.sendMessage(player,"Type the letter of the card to draft");
+        gameServer.sendMessage(player, "Type the letter of the card to draft");
 
         while (true) {
             String response = gameServer.readMessage(player);
@@ -89,20 +92,17 @@ public class BoomerangAustralia {
                 }
             }
 
-            gameServer.sendMessage(player,"Invalid card. Choose a card from your hand.");
+            gameServer.sendMessage(player, "Invalid card. Choose a card from your hand.");
         }
     }
 
 
-
-
     private int roundScore(Player player, int roundNr) {
         HashMap<String, Integer> score = new HashMap<>();
-        //Fix total score and round score... Also, sum up the round score according to the scoring sheet
 
         //Requirement 10a
-        int firstCardNumber = player.getDraft().get(0).number();
-        int lastCardNumber = player.getDraft().get(6).number();
+        int firstCardNumber = player.getDraft().getFirst().number();
+        int lastCardNumber = player.getDraft().get(CARDS_PER_HAND - 1).number();
         int throwCatchScore = Math.abs(firstCardNumber - lastCardNumber);
 
         gameServer.sendMessage(player, "This round you scored %d as your Throw and catch score".formatted(throwCatchScore));
@@ -128,25 +128,9 @@ public class BoomerangAustralia {
         Map<String, Integer> newActivitiesMap = getAvailableActivities(player);
         gameServer.sendMessage(player, "This round you have gathered the following new activities:");
         gameServer.sendMessage(player, "%s\nSelect if you wish to score one of them"
-                .formatted(ActivityFormatter.format(newActivitiesMap)));
+                .formatted(GameFormatter.formatActivities(newActivitiesMap)));
 
-        int countRoundActivities = 0;
-        for (Map.Entry<String, Integer> activity : newActivitiesMap.entrySet()) {
-            int frequency = activity.getValue();
-            int scoret = ScoreCalculator.calculateActivityScore(frequency);
-            gameServer.sendMessage(player, "Want to keep %s(%d) [%d points]? (Y/N)"
-                    .formatted(activity.getKey(), activity.getValue(), scoret));
-            String response = player.isBot() ? "Y" : gameServer.readMessage(player);
-
-            if (response.equalsIgnoreCase("Y")) {
-                player.getActivitiesScore().put(activity.getKey(), scoret);
-                gameServer.sendMessage(player, "This round you scored this activity: %s[%d points]"
-                        .formatted(activity.getKey(), scoret));
-                //We do not need to add the Activity score to the score variable, since it's stored separately in the activitiesScore hashmap
-                countRoundActivities = scoret;
-                break; //Requirement 10e(i) exit the loop since you are only allowed to score one activity per round
-            }
-        }
+        int countRoundActivities = scoreActivities(player, newActivitiesMap);
 
         player.getRScore().add(score);
 
@@ -187,136 +171,32 @@ public class BoomerangAustralia {
                 player.getRScore(), player.getActivitiesScore(), regionBonus);
 
         //Requirement 12
-        String scoreboard = ScoreFormatter.format(
+        String scoreboard = GameFormatter.formatScore(
                 player.getRScore(), player.getActivitiesScore(), regionBonus);
         gameServer.sendMessage(player, "\n*********************************************\n" + scoreboard);
 
         return totalScore;
     }
 
+    private int scoreActivities(Player player, Map<String, Integer> newActivitiesMap) {
+        for (Map.Entry<String, Integer> activity : newActivitiesMap.entrySet()) {
+            int activityScore = ScoreCalculator.calculateActivityScore(activity.getValue());
 
+            gameServer.sendMessage(player, "Want to keep %s(%d) [%d points]? (Y/N)"
+                    .formatted(activity.getKey(), activity.getValue(), activityScore));
+            String response = player.isBot() ? "Y" : gameServer.readMessage(player);
 
-
-
-
-
-
-
-
-    public void initGame(int numPlayers, int numBots) {
-
-
-        String[] regions = {
-                "Wester Australia", "Northern Territory", "Queensland", "South Australia", "New South Whales", "Victoria", "Tasmania"
-        };
-
-        ArrayList<String> finishedRegions = new ArrayList<>();
-
-        try {
-            List<Card> deck = DeckFactory.createDeck();  //Requirement 2
-
-            Collections.shuffle(deck); //Requirement 3
-            initializePlayers(numPlayers, numBots);
-            //Requirement 4
-            for (Player player : players) {
-                for (int i = 0; i < 7; i++) {
-                    player.getHand().add(deck.removeFirst());
-                }
+            if (response.equalsIgnoreCase("Y")) {
+                player.getActivitiesScore().put(activity.getKey(), activityScore);
+                gameServer.sendMessage(player, "This round you scored this activity: %s[%d points]"
+                        .formatted(activity.getKey(), activityScore));
+                //We do not need to add the Activity score to the score variable, since it's stored separately in the activitiesScore hashmap
+                return activityScore; //Requirement 10e(i) exit the loop since you are only allowed to score one activity per round
             }
-            //Requirement 12 - play 4 rounds
-            for (int round = 0; round < 4; round++) { //Requirement 11
-                //Draft 6 cards, the 7th card is sent to the previous player's hand
-                for (int i = 0; i < 6; i++) { //Requirement 8
-                    ExecutorService threadpool = Executors.newFixedThreadPool(players.size());
-                    for (int p = 0; p < players.size(); p++) {
-                        final int currentPlayerIndex = p;
-                        Player sendHand;
-                        if (i < 5) {
-                            // Requirement 6 (Pass remaining cards to the next player)
-                            sendHand = (p < (players.size() - 1)) ? players.get(p + 1) : players.getFirst();
-                        } else {
-                            // Requirement 9 (The final card is passed to the previous player)
-                            sendHand = (p > 0) ? players.get(p - 1) : players.getLast();
-                        }
-                        //Requirement 7 - Make sure every player can draft their card at the same time
-                        Runnable task = () -> addCardToDraft(players.get(currentPlayerIndex), sendHand);
-                        threadpool.execute(task);
-                    }
-                    threadpool.shutdown();
-
-                    //wait for all the hands to switch places
-                    while (!threadpool.isTerminated()) {
-                        Thread.sleep(100);
-                    }
-
-                    for (Player sendToPlayer : players) {
-                        sendToPlayer.getHand().clear();
-                        // grab the cards passed on from the previous player
-                        sendToPlayer.getHand().addAll(sendToPlayer.getNextHand());
-                    }
-                    // Requirement 5 (Keep throw card hidden)
-                    if (i > 0) {
-                        // Requirement 7 (Show cards)
-                        for (int pID = 0; pID < players.size(); pID++) {
-                            for (Player sendToPlayer : players) {
-                                Player draftedPlayer = players.get(pID);
-                                gameServer.sendMessage(sendToPlayer, "\nPlayer " + pID + " has drafted\n" + CardFormatter.format(draftedPlayer.getDraft().subList(1, draftedPlayer.getDraft().size())));
-                            }
-                        }
-                    }
-                }
-                // Check if I'm the first to complete a region, add regionBonusScore if that's the case
-                //Requirement 10b(i+ii)
-                for (int r = 0; r < regions.length; r++) {
-                    boolean regionComplete = false;
-                    for (Player player : players) {
-                        if (!finishedRegions.contains(regions[r]) &&
-                                RegionChecker.isRegionComplete(regions[r], player.getSites(), player.getDraft())) {
-                            player.getRegion().add(regions[r]);
-                            player.setRegionRoundScore(player.getRegionRoundScore() + 3);
-                            regionComplete = true;
-                        }
-                    }
-                    if (regionComplete) {
-                        finishedRegions.add(regions[r]); //Requirement 10b(ii)
-                    }
-                }
-
-                for (Player player : players) {
-                    player.getDraft().add(player.getHand().removeFirst()); //Requirement 9 - last card on hand is added to draft
-                    //Requirement 10 - scoring
-                    gameServer.sendMessage(player,"********************************\nYour draft this round: \n" + CardFormatter.format(player.getDraft()) + "\n");
-                    player.setFinalScore(roundScore(player, round));
-                    gameServer.sendMessage(player,"The following regions have now been completed: " + finishedRegions);
-                }
-
-                deck = DeckFactory.createDeck(); //Requirement 11 & Requirement 2
-                Collections.shuffle(deck); //Requirement 3
-                //Requirement 4
-                for (Player player : players) {
-                    player.getDraft().clear();
-                    player.getHand().clear();
-                    for (int i = 0; i < 7; i++) {
-                        player.getHand().add(deck.removeFirst());
-                    }
-                }
-            }
-            Player highScore = players.getFirst();
-            for (Player player : players) {
-                if (player.getFinalScore() > highScore.getFinalScore()) {
-                    highScore = player;
-                }
-            }
-            for (Player player : players) {
-                gameServer.sendMessage(player,"The winner is player: " + players.indexOf(highScore) + " with " + highScore.getFinalScore() + " points");
-            }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        } finally {
-            gameServer.closeConnections();
         }
-    }
 
+        return 0;
+    }
 
     public void initializePlayers(int numberPlayers, int numberOfBots) throws IOException {
         players.add(new Player(0, false));
@@ -327,7 +207,167 @@ public class BoomerangAustralia {
 
         gameServer.acceptPlayers(players, numberPlayers, numberOfBots);
     }
-}
 
+
+    public void initGame(int numPlayers, int numBots) {
+
+        String[] regions = {
+                "Wester Australia",
+                "Northern Territory",
+                "Queensland",
+                "South Australia",
+                "New South Whales",
+                "Victoria",
+                "Tasmania"
+        };
+
+        ArrayList<String> finishedRegions = new ArrayList<>();
+
+        try {
+            List<Card> deck = DeckFactory.createDeck();  //Requirement 2
+
+            Collections.shuffle(deck); //Requirement 3
+            initializePlayers(numPlayers, numBots);
+            //Requirement 4
+            dealCards(deck);
+            //Requirement 12 - play 4 rounds
+            for (int round = 0; round < 4; round++) { //Requirement 11
+                //Draft 6 cards, the 7th card is sent to the previous player's hand
+                draftRound();
+                // Check if I'm the first to complete a region, add regionBonusScore if that's the case
+                //Requirement 10b(i+ii)
+                checkCompletedRegions(regions, finishedRegions);
+                scorePlayers(round, finishedRegions); //Requirement 9 & 10
+                deck = DeckFactory.createDeck(); //Requirement 11 & Requirement 2
+                Collections.shuffle(deck); //Requirement 3
+                //Requirement 4
+                for (Player player : players) {
+                    player.getDraft().clear();
+                    player.getHand().clear();
+                }
+                dealCards(deck);
+            }
+            Player highScore = ScoreCalculator.getHighestScoringPlayer(players);
+
+            for (Player player : players) {
+                gameServer.sendMessage(player, "The winner is player: " + players.indexOf(highScore) + " with " + highScore.getFinalScore() + " points");
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            System.out.println(e.getMessage());
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        } finally {
+            gameServer.closeConnections();
+        }
+
+    }
+
+    private void dealCards(List<Card> deck) {
+        for (Player player : players) {
+            for (int i = 0; i < CARDS_PER_HAND; i++) {
+                player.getHand().add(deck.removeFirst());
+            }
+        }
+    }
+
+    private void draftRound() throws InterruptedException {
+        for (int i = 0; i < DRAFTING_TURNS; i++) { //Requirement 8
+            executeDraftingTurn(i);
+            passHands();
+
+            // Requirement 5 (Keep throw card hidden)
+            if (i > 0) {
+                showDraftedCards();
+            }
+        }
+    }
+
+    private void executeDraftingTurn(int turn) throws InterruptedException {
+        try (ExecutorService threadPool = Executors.newFixedThreadPool(players.size())) {
+            for (int p = 0; p < players.size(); p++) {
+                Player player = players.get(p);
+                Player sendHand = getReceivingPlayer(p, turn);
+
+                //Requirement 7 - Make sure every player can draft their card at the same time
+                Runnable task = () -> addCardToDraft(player, sendHand);
+                threadPool.execute(task);
+            }
+
+            threadPool.shutdown();
+
+            //wait for all the hands to switch places
+            while (true) {
+                if (threadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS)) break;
+                // Wait until every player has finished drafting
+            }
+        }
+    }
+
+    private void passHands() {
+        for (Player sendToPlayer : players) {
+            sendToPlayer.getHand().clear();
+            // grab the cards passed on from the previous player
+            sendToPlayer.getHand().addAll(sendToPlayer.getNextHand());
+        }
+    }
+
+    private void showDraftedCards() {
+        // Requirement 7 (Show cards)
+        for (int pID = 0; pID < players.size(); pID++) {
+            Player draftedPlayer = players.get(pID);
+
+            for (Player sendToPlayer : players) {
+                gameServer.sendMessage(sendToPlayer, "\nmodel.Player " + pID + " has drafted\n"
+                        + GameFormatter.formatCards(draftedPlayer.getDraft().subList(1, draftedPlayer.getDraft().size())));
+            }
+        }
+    }
+
+    private Player getReceivingPlayer(int playerIndex, int turn) {
+        // Requirement 6 (Pass remaining cards to the next player)
+        // Requirement 9 (The final card is passed to the previous player)
+
+        // If this isn't the last drafting turn, pass forward. Otherwise, pass backward.
+        return turn < DRAFTING_TURNS -1
+                ? players.get((playerIndex + 1) % players.size())
+                : players.get((playerIndex - 1 + players.size()) % players.size());
+    }
+
+    private void checkCompletedRegions(String[] regions, List<String> finishedRegions) {
+        for (String region : regions) {
+            boolean regionComplete = false;
+
+            for (Player player : players) {
+                if (!finishedRegions.contains(region) &&
+                        RegionChecker.isRegionComplete(region, player.getSites(), player.getDraft())) {
+                    player.getRegion().add(region);
+                    player.setRegionRoundScore(player.getRegionRoundScore() + 3);
+                    regionComplete = true;
+                }
+            }
+
+            if (regionComplete) {
+                finishedRegions.add(region); //Requirement 10b(ii)
+            }
+        }
+    }
+
+    private void scorePlayers(int round, List<String> finishedRegions) {
+        for (Player player : players) {
+            player.getDraft().add(player.getHand().removeFirst()); //Requirement 9 - last card on hand is added to draft
+
+            //Requirement 10 - scoring
+            gameServer.sendMessage(player, "********************************\nYour draft this round: \n"
+                    + GameFormatter.formatCards(player.getDraft()) + "\n");
+
+            player.setFinalScore(roundScore(player, round));
+
+            gameServer.sendMessage(player, "The following regions have now been completed: " + finishedRegions);
+        }
+    }
+
+
+}
 
 
