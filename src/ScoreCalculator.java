@@ -1,4 +1,6 @@
+import model.Animals;
 import model.Card;
+import model.Collections;
 import model.Player;
 
 import java.util.List;
@@ -21,31 +23,38 @@ public final class ScoreCalculator {
         return count;
     }
 
-    public static int calculateAnimalScore(List<Card> draft) {
-        String[] animals = {"Kangaroos", "Emus", "Wombats", "Koalas", "Platypuses"};
-        int[] points = {3, 4, 5, 7, 9};
+    private static final Map<String, Integer> ANIMAL_POINTS = Map.of(
+            Animals.KANGAROOS, 3,
+            Animals.EMUS, 4,
+            Animals.WOMBATS, 5,
+            Animals.KOALAS, 7,
+            Animals.PLATYPUSES, 9
+    );
 
+    public static int calculateAnimalScore(List<Card> draft) {
         int total = 0;
 
-        for (int i = 0; i < animals.length; i++) {
-            if (countMatchingCards(draft, animals[i], Card::animals) == 2) {
-                total += points[i];
+        for (Map.Entry<String, Integer> animal : ANIMAL_POINTS.entrySet()) {
+            if (countMatchingCards(draft, animal.getKey(), Card::animals) == 2) {
+                total += animal.getValue();
             }
         }
 
         return total;
     }
 
+
+
     public static int calculateCollectionScore(List<Card> draft) {
-        String[] collections = {"Leaves", "Wildflowers", "Shells", "Souvenirs"};
         int total = 0;
 
-        for (String collection : collections) {
+        for (String collection : Collections.ALL) {
             int matchingCardCount = countMatchingCards(draft, collection, Card::collections);
             int points = (matchingCardCount < 8) ? matchingCardCount * 2 : matchingCardCount;
 
             total += points;
         }
+
         return total;
     }
 
@@ -87,11 +96,6 @@ public final class ScoreCalculator {
                 highScore = player;
             }
         }
-
         return highScore;
     }
-
-
-
-
 }

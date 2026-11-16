@@ -1,5 +1,7 @@
+import model.Activities;
 import model.Card;
 import model.Player;
+import model.Regions;
 
 import java.util.*;
 import java.io.*;
@@ -153,10 +155,9 @@ public class BoomerangAustralia {
     }
 
     private Map<String, Integer> getAvailableActivities(Player player) {
-        String[] act = {"Indigenous Culture", "Bushwalking", "Swimming", "Sightseeing"};
         Map<String, Integer> newActivitiesMap = new LinkedHashMap<>();
 
-        for (String thisAct : act) { //Requirement 10e(ii)
+        for (String thisAct : Activities.ALL) { //Requirement 10e(ii)
             if (!player.getActivitiesScore().containsKey(thisAct)) {
                 int frequency = ScoreCalculator.countMatchingCards(
                         player.getDraft(), thisAct, Card::activities);
@@ -214,15 +215,7 @@ public class BoomerangAustralia {
 
     public void initGame(int numPlayers, int numBots) {
 
-        String[] regions = {
-                "Wester Australia",
-                "Northern Territory",
-                "Queensland",
-                "South Australia",
-                "New South Whales",
-                "Victoria",
-                "Tasmania"
-        };
+        List<String> regions = Regions.ALL;
 
         ArrayList<String> finishedRegions = new ArrayList<>();
 
@@ -341,7 +334,7 @@ public class BoomerangAustralia {
                 : players.get((playerIndex - 1 + players.size()) % players.size());
     }
 
-    private void checkCompletedRegions(String[] regions, List<String> finishedRegions) {
+    private void checkCompletedRegions(List<String> regions, List<String> finishedRegions) {
         for (String region : regions) {
             boolean regionComplete = false;
 
