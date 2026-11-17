@@ -5,7 +5,7 @@ import java.util.List;
 
 import static model.Regions.*;
 import static model.Activities.*;
-import static model.Collections.*;
+import static model.CollectionTypes.*;
 import static model.Animals.*;
 
 public final class DeckFactory {

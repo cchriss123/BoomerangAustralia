@@ -120,10 +120,10 @@ public class BoomerangAustralia {
                 .formatted(thisRoundSites, player.getRegionRoundScore()));
         score.put("Tourist sites score", thisRoundSites);
 
-        //Requirement 10c - Calculate score for Collections
+        //Requirement 10c - Calculate score for CollectionTypes
         int countRoundCollections = ScoreCalculator.calculateCollectionScore(player.getDraft());
         gameServer.sendMessage(player, "This round you scored %d collection points".formatted(countRoundCollections));
-        score.put("Collections score", countRoundCollections);
+        score.put("CollectionTypes score", countRoundCollections);
 
         //Requirement 10d Calculate score for
         int countRoundAnimals = ScoreCalculator.calculateAnimalScore(player.getDraft());

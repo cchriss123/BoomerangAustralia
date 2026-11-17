@@ -7,5 +7,5 @@ public record Card(
         int number,
         String collections,
         String animals,
-        String activities)
-{ }
+        String activities
+) { }

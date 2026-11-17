@@ -1,6 +1,6 @@
 import model.Animals;
 import model.Card;
-import model.Collections;
+import model.CollectionTypes;
 import model.Player;
 
 import java.util.List;
@@ -48,7 +48,7 @@ public final class ScoreCalculator {
     public static int calculateCollectionScore(List<Card> draft) {
         int total = 0;
 
-        for (String collection : Collections.ALL) {
+        for (String collection : CollectionTypes.ALL) {
             int matchingCardCount = countMatchingCards(draft, collection, Card::collections);
             int points = (matchingCardCount < 8) ? matchingCardCount * 2 : matchingCardCount;
 

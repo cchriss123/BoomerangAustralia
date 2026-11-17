@@ -14,7 +14,7 @@ public final class GameFormatter {
         List<String> categories = List.of(
                 "Throw and Catch score",
                 "Tourist sites score",
-                "Collections score",
+                "CollectionTypes score",
                 "Animals score"
         );
 
@@ -64,7 +64,7 @@ public final class GameFormatter {
         String[] labels = {
                 "Site [letter] (nr):",
                 "Region:",
-                "Collections:",
+                "CollectionTypes:",
                 "Animals:",
                 "Activities:"
         };

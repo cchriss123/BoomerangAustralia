@@ -2,7 +2,7 @@ package model;
 
 import java.util.List;
 
-public final class Collections {
+public final class CollectionTypes {
 
     public static final String LEAVES = "Leaves";
     public static final String SHELLS = "Shells";
@@ -16,5 +16,5 @@ public final class Collections {
             SOUVENIRS
     );
 
-    private Collections() {}
+    private CollectionTypes() {}
 }
