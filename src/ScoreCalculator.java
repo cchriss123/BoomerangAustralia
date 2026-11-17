@@ -106,4 +106,11 @@ public final class ScoreCalculator {
         }
         return highScore;
     }
+
+    public static int calculateThrowCatchScore(List<Card> draft) {
+        int firstCardNumber = draft.getFirst().number();
+        int lastCardNumber = draft.getLast().number();
+
+        return Math.abs(firstCardNumber - lastCardNumber);
+    }
 }

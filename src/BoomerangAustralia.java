@@ -103,13 +103,11 @@ public class BoomerangAustralia {
     }
 
 
-    private int roundScore(Player player, int roundNr) {
+    private int scoreRound(Player player) {
         HashMap<String, Integer> score = new HashMap<>();
 
         //Requirement 10a
-        int firstCardNumber = player.getDraft().getFirst().number();
-        int lastCardNumber = player.getDraft().get(CARDS_PER_HAND - 1).number();
-        int throwCatchScore = Math.abs(firstCardNumber - lastCardNumber);
+        int throwCatchScore = ScoreCalculator.calculateThrowCatchScore(player.getDraft());
 
         gameServer.sendMessage(player, "This round you scored %d as your Throw and catch score".formatted(throwCatchScore));
         score.put("Throw and Catch score", throwCatchScore);
@@ -123,7 +121,7 @@ public class BoomerangAustralia {
         //Requirement 10c - Calculate score for CollectionTypes
         int countRoundCollections = ScoreCalculator.calculateCollectionScore(player.getDraft());
         gameServer.sendMessage(player, "This round you scored %d collection points".formatted(countRoundCollections));
-        score.put("CollectionTypes score", countRoundCollections);
+        score.put("Collection score", countRoundCollections);
 
         //Requirement 10d Calculate score for
         int countRoundAnimals = ScoreCalculator.calculateAnimalScore(player.getDraft());
@@ -131,18 +129,9 @@ public class BoomerangAustralia {
         score.put("Animals score", countRoundAnimals);
 
         //Requirement 10e Calculate score for the Activities if the player wants to score it
-        Map<String, Integer> newActivitiesMap = getAvailableActivities(player);
-        gameServer.sendMessage(player, "This round you have gathered the following new activities:");
-        gameServer.sendMessage(player, "%s\nSelect if you wish to score one of them"
-                .formatted(GameFormatter.formatActivities(newActivitiesMap)));
-
-        int countRoundActivities = scoreActivities(player, newActivitiesMap);
-
+        int countRoundActivities = handleActivityScoring(player);
         player.getRScore().add(score);
 
-        if (roundNr == NUMBER_OF_ROUNDS - 1) { //last round we count from 0
-            return finalScore(player);
-        }
 
         int totalRoundScore = player.getRegionRoundScore()
                 + throwCatchScore
@@ -230,28 +219,16 @@ public class BoomerangAustralia {
             //Requirement 12 - play 4 rounds
             for (int round = 0; round < NUMBER_OF_ROUNDS; round++) { //Requirement 11
                 draftRound();
-                checkCompletedRegions(regions, finishedRegions); //Requirement 10b(i+ii)
+                updateCompletedRegions(regions, finishedRegions); //Requirement 10b(i+ii)
                 scorePlayers(round, finishedRegions); //Requirement 9 & 10
 
                 if (round == NUMBER_OF_ROUNDS - 1) {  // no need to clear hand if last round
                     break;
                 }
 
-                deck = DeckFactory.createDeck(); //Requirement 11 & Requirement 2
-                Collections.shuffle(deck); //Requirement 3
-                //Requirement 4
-                for (Player player : players) {
-                    player.getDraft().clear();
-                    player.getHand().clear();
-                }
-                dealCards(deck);
+                prepareNextRound();
             }
-            Player highScore = ScoreCalculator.getHighestScoringPlayer(players);
-
-            for (Player player : players) {
-                gameServer.sendMessage(player, "The winner is player: %d with %d points"
-                        .formatted(players.indexOf(highScore), highScore.getFinalScore()));
-            }
+            announceWinner();
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -262,6 +239,26 @@ public class BoomerangAustralia {
             gameServer.closeConnections();
         }
 
+    }
+
+    private void announceWinner() {
+        Player highScore = ScoreCalculator.getHighestScoringPlayer(players);
+
+        for (Player player : players) {
+            gameServer.sendMessage(player, "The winner is player: %d with %d points"
+                    .formatted(players.indexOf(highScore), highScore.getFinalScore()));
+        }
+    }
+
+    private void prepareNextRound() {
+        List<Card> deck = DeckFactory.createDeck(); //Requirement 11 & Requirement 2
+        Collections.shuffle(deck); //Requirement 3
+        //Requirement 4
+        for (Player player : players) {
+            player.getDraft().clear();
+            player.getHand().clear();
+        }
+        dealCards(deck);
     }
 
     private void dealCards(List<Card> deck) {
@@ -340,13 +337,16 @@ public class BoomerangAustralia {
                 : players.get((playerIndex - 1 + players.size()) % players.size());
     }
 
-    private void checkCompletedRegions(List<String> regions, List<String> finishedRegions) {
+    private void updateCompletedRegions(List<String> regions, List<String> finishedRegions) {
         for (String region : regions) {
+            if (finishedRegions.contains(region)) {
+                continue;
+            }
+
             boolean regionComplete = false;
 
             for (Player player : players) {
-                if (!finishedRegions.contains(region) &&
-                        RegionChecker.isRegionComplete(region, player.getSites(), player.getDraft())) {
+                if (RegionChecker.isRegionComplete(region, player.getSites(), player.getDraft())) {
                     player.getCompletedRegions().add(region);
                     player.setRegionRoundScore(player.getRegionRoundScore() + 3);
                     regionComplete = true;
@@ -361,17 +361,29 @@ public class BoomerangAustralia {
 
     private void scorePlayers(int round, List<String> finishedRegions) {
         for (Player player : players) {
-            player.getDraft().add(player.getHand().removeFirst()); //Requirement 9 - last card on hand is added to draft
+            player.getDraft().add(player.getHand().removeFirst()); // Catch card
 
-            //Requirement 10 - scoring
             gameServer.sendMessage(player, """
                 ********************************
                 Your draft this round:
                 """ + GameFormatter.formatCards(player.getDraft()) + "\n");
 
-            player.setFinalScore(roundScore(player, round));
+            // Always score the round, including round 4
+            int roundScore = scoreRound(player);
 
+            // Calculate the total game score after the final round
+            player.setFinalScore(round == NUMBER_OF_ROUNDS - 1 ? finalScore(player) : roundScore);
             gameServer.sendMessage(player, "The following regions have now been completed: " + finishedRegions);
         }
+    }
+
+    private int handleActivityScoring(Player player) {
+        Map<String, Integer> availableActivities = getAvailableActivities(player);
+
+        gameServer.sendMessage(player, "This round you have gathered the following new activities:");
+        gameServer.sendMessage(player, "%s\nSelect if you wish to score one of them"
+                .formatted(GameFormatter.formatActivities(availableActivities)));
+
+        return scoreActivities(player, availableActivities);
     }
 }
