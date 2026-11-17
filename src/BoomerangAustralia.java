@@ -79,6 +79,7 @@ public class BoomerangAustralia {
                 .formatted(GameFormatter.formatCards(player.getHand())));
     }
 
+    @SuppressWarnings("java:S2245")
     private String chooseCard(Player player) {
         // Prompt the user for which cards to keep (remove from hand and add to draft)
         if (player.isBot()) {
