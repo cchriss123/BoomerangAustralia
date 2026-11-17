@@ -170,7 +170,7 @@ public class BoomerangAustralia {
     }
 
     private int finalScore(Player player) {
-        int regionBonus = player.getRegion().size() * 3;
+        int regionBonus = player.getCompletedRegions().size() * 3;
         int totalScore = ScoreCalculator.calculateFinalScore(
                 player.getRScore(), player.getActivitiesScore(), regionBonus);
 
@@ -341,7 +341,7 @@ public class BoomerangAustralia {
             for (Player player : players) {
                 if (!finishedRegions.contains(region) &&
                         RegionChecker.isRegionComplete(region, player.getSites(), player.getDraft())) {
-                    player.getRegion().add(region);
+                    player.getCompletedRegions().add(region);
                     player.setRegionRoundScore(player.getRegionRoundScore() + 3);
                     regionComplete = true;
                 }

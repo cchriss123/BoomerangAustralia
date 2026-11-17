@@ -5,12 +5,12 @@ import java.util.*;
 public class Player {
     private final int playerID;
     private final boolean isBot;
-    private final List<String> region = new ArrayList<>();
+    private final List<String> completedRegions = new ArrayList<>();
     private final List<Card> nextHand = new ArrayList<>();
     private final List<Card> hand = new ArrayList<>();
     private final List<Card> draft = new ArrayList<>();
     private final Map<String, String> sites = new HashMap<>(); //letter, region
-    private final List<Map<String, Integer>> rScore = new ArrayList<>();
+    private final List<Map<String, Integer>> roundScore = new ArrayList<>();
     private final Map<String, Integer> activitiesScore = new HashMap<>();
     private int regionRoundScore = 0;
     private int finalScore = 0;
@@ -53,8 +53,8 @@ public class Player {
         return isBot;
     }
 
-    public List<String> getRegion() {
-        return region;
+    public List<String> getCompletedRegions() {
+        return completedRegions;
     }
 
     public List<Card> getNextHand() {
@@ -74,7 +74,7 @@ public class Player {
     }
 
     public List<Map<String, Integer>> getRScore() {
-        return rScore;
+        return roundScore;
     }
 
     public Map<String, Integer> getActivitiesScore() {
