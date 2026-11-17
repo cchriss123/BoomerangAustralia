@@ -74,7 +74,7 @@ public final class GameFormatter {
 
             for (Card card : cards) {
                 String value = switch (row) {
-                    case 0 -> card.name() + " [" + card.letter() + "] (" + card.number() + ")";
+                    case 0 -> "%s [%s] (%d)".formatted(card.name(), card.letter(), card.number());
                     case 1 -> card.region();
                     case 2 -> card.collections();
                     case 3 -> card.animals();

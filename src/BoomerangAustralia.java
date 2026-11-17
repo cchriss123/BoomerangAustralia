@@ -13,6 +13,7 @@ public class BoomerangAustralia {
     private final GameServer gameServer = new GameServer();
     private static final int CARDS_PER_HAND = 7;
     private static final int DRAFTING_TURNS = CARDS_PER_HAND - 1;
+    private static final int NUMBER_OF_ROUNDS = 4;
 
     public static void main(String[] args) {
 
@@ -139,7 +140,7 @@ public class BoomerangAustralia {
 
         player.getRScore().add(score);
 
-        if (roundNr == 3) {//last round
+        if (roundNr == NUMBER_OF_ROUNDS - 1) { //last round we count from 0
             return finalScore(player);
         }
 
@@ -227,10 +228,15 @@ public class BoomerangAustralia {
             //Requirement 4
             dealCards(deck);
             //Requirement 12 - play 4 rounds
-            for (int round = 0; round < 4; round++) { //Requirement 11
+            for (int round = 0; round < NUMBER_OF_ROUNDS; round++) { //Requirement 11
                 draftRound();
                 checkCompletedRegions(regions, finishedRegions); //Requirement 10b(i+ii)
                 scorePlayers(round, finishedRegions); //Requirement 9 & 10
+
+                if (round == NUMBER_OF_ROUNDS - 1) {  // no need to clear hand if last round
+                    break;
+                }
+
                 deck = DeckFactory.createDeck(); //Requirement 11 & Requirement 2
                 Collections.shuffle(deck); //Requirement 3
                 //Requirement 4
