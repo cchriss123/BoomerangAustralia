@@ -59,7 +59,11 @@ public class GameServer {
             return;
         }
 
+
+
         try (ServerSocket serverSocket = new ServerSocket(2048)) {
+            System.out.println("Server started on port 2048");
+            System.out.println("Waiting for " + (numberPlayers - 1) + " player(s) to connect...");
             for (int i = numberOfBots + 1; i < numberPlayers + numberOfBots; i++) {
                 Socket connectionSocket = serverSocket.accept();
 

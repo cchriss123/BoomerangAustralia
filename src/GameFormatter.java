@@ -1,4 +1,6 @@
+
 import model.Card;
+
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -19,85 +21,95 @@ public final class GameFormatter {
                 "Animals score"
         );
 
-        String[] act = {"Indigenous Culture", "Bushwalking", "Swimming", "Sightseeing"};
+        String[] activities = {
+                "Indigenous Culture",
+                "Bushwalking",
+                "Swimming",
+                "Sightseeing"
+        };
 
-        //Requirement 12
-        StringBuilder scoreboard = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
 
-        scoreboard.append(String.format("%-25s %8s %8s %8s %8s %8s%n",
-                "Category", "Round 1", "Round 2", "Round 3", "Round 4", "Total"));
+        sb.append("\n========== SCOREBOARD ==========\n\n");
+
+        sb.append("%-25s %8s %8s %8s %8s %8s%n".formatted(
+                "Category", "Round 1", "Round 2",
+                "Round 3", "Round 4", "Total"
+        ));
+
+        sb.append("-".repeat(75)).append("\n");
 
         for (String category : categories) {
-            scoreboard.append(String.format("%-25s", category));
+            sb.append("%-25s".formatted(category));
 
             for (Map<String, Integer> round : rScore) {
-                scoreboard.append(String.format(" %8d", round.get(category)));
+                sb.append(" %8d".formatted(round.get(category)));
             }
 
-            int categoryTotal = ScoreCalculator.calculateTotal(rScore, category);
-            scoreboard.append(String.format(" %8d%n", categoryTotal));
+            int total = ScoreCalculator.calculateTotal(rScore, category);
+            sb.append(" %8d%n".formatted(total));
         }
 
-        scoreboard.append(String.format("%-25s %8s %8s %8s %8s %8s%n",
-                "", "IndC", "Bushw", "Swim", "Sights", "Total"));
-        scoreboard.append(String.format("%-25s", "Activities score"));
+        sb.append("\nACTIVITIES\n");
+        sb.append("-".repeat(35)).append("\n");
 
-        int totalAct = 0;
-        for (String activity : act) {
+        int totalActivities = 0;
+
+        for (String activity : activities) {
             int points = activitiesScore.getOrDefault(activity, 0);
-            scoreboard.append(String.format(" %8d", points));
-            totalAct += points;
+            sb.append("%-25s %5d%n".formatted(activity, points));
+            totalActivities += points;
         }
 
-        scoreboard.append(String.format(" %8d%n", totalAct));
-        scoreboard.append(String.format("%-25s %8d%n", "Region bonuses", regionBonus));
+        sb.append("%-25s %5d%n".formatted(
+                "Activities total", totalActivities
+        ));
 
-        int totalScore = ScoreCalculator.calculateFinalScore(rScore, activitiesScore, regionBonus);
+        sb.append("\nBONUSES & TOTAL\n");
+        sb.append("-".repeat(35)).append("\n");
 
-        scoreboard.append(String.format("%-25s %8d points%n", "Total score", totalScore));
+        sb.append("%-25s %5d%n".formatted(
+                "Region bonuses", regionBonus
+        ));
 
-        return scoreboard.toString();
+        int totalScore = ScoreCalculator.calculateFinalScore(
+                rScore, activitiesScore, regionBonus
+        );
+
+        sb.append("%-25s %5d points%n".formatted(
+                "FINAL SCORE", totalScore
+        ));
+
+        return sb.toString();
     }
 
     public static String formatCards(List<Card> cards) {
+        if (cards.isEmpty()) {
+            return "No cards.\n";
+        }
+
         StringBuilder sb = new StringBuilder();
 
-        String[] labels = {
-                "Site [letter] (nr):",
-                "Region:",
-                "CollectionTypes:",
-                "Animals:",
-                "Activities:"
-        };
+        for (Card card : cards) {
+            sb.append("\n");
+            sb.append("[%s] %s (%d)%n".formatted(
+                    card.letter(), card.name(), card.number()
+            ));
 
-        for (int row = 0; row < labels.length; row++) {
-            sb.append(String.format("%27s", labels[row]));
-
-            for (Card card : cards) {
-                String value = switch (row) {
-                    case 0 -> "%s [%s] (%d)".formatted(card.name(), card.letter(), card.number());
-                    case 1 -> card.region();
-                    case 2 -> card.collections();
-                    case 3 -> card.animals();
-                    case 4 -> card.activities();
-                    default -> "";
-                };
-
-                sb.append(String.format("%-35s", value));
-            }
-
-            if (row < labels.length - 1) {
-                sb.append("\n");
-            }
+            sb.append("    Region:      %s%n".formatted(card.region()));
+            sb.append("    Collections: %s%n".formatted(card.collections()));
+            sb.append("    Animals:     %s%n".formatted(card.animals()));
+            sb.append("    Activities:  %s%n".formatted(card.activities()));
         }
 
         return sb.toString();
     }
 
     public static String formatActivities(Map<String, Integer> activities) {
-        return activities.entrySet()
-                .stream()
-                .map(entry -> "%s(# %d)\t".formatted(entry.getKey(), entry.getValue()))
-                .collect(Collectors.joining());
+        return activities.entrySet().stream()
+                .map(entry -> "%s (%d)".formatted(
+                        entry.getKey(), entry.getValue()
+                ))
+                .collect(Collectors.joining(", "));
     }
 }
