@@ -1,6 +1,7 @@
 import model.Card;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public final class GameFormatter {
 
@@ -94,15 +95,9 @@ public final class GameFormatter {
     }
 
     public static String formatActivities(Map<String, Integer> activities) {
-        StringBuilder newActivities = new StringBuilder();
-
-        for (Map.Entry<String, Integer> entry : activities.entrySet()) {
-            newActivities.append(entry.getKey())
-                    .append("(# ")
-                    .append(entry.getValue())
-                    .append(")\t");
-        }
-
-        return newActivities.toString();
+        return activities.entrySet()
+                .stream()
+                .map(entry -> "%s(# %d)\t".formatted(entry.getKey(), entry.getValue()))
+                .collect(Collectors.joining());
     }
 }
