@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
 
 public class GameServer {
 
@@ -52,34 +53,33 @@ public class GameServer {
         }
     }
 
-    public void acceptPlayers(List<Player> players, int numberPlayers, int numberOfBots) throws IOException {
-
-        // No remote players? No server socket needed.
-        if (numberPlayers <= 1) {
-            return;
-        }
-
-
+    public void acceptPlayers(List<Player> players, int numberPlayers, int numberOfBots, CountDownLatch serverReady) throws IOException {
 
         try (ServerSocket serverSocket = new ServerSocket(2048)) {
+            serverReady.countDown();
             System.out.println("Server started on port 2048");
-            System.out.println("Waiting for " + (numberPlayers - 1) + " player(s) to connect...");
-            for (int i = numberOfBots + 1; i < numberPlayers + numberOfBots; i++) {
-                Socket connectionSocket = serverSocket.accept();
+            System.out.printf("Waiting for %d human player(s)...%n", numberPlayers);
 
-                ObjectInputStream inFromClient = new ObjectInputStream(connectionSocket.getInputStream());
+            for (int i = 0; i < numberPlayers; i++) {
+                Socket socket = serverSocket.accept();
 
-                ObjectOutputStream outToClient = new ObjectOutputStream(connectionSocket.getOutputStream());
+                ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
 
-                Player player = new Player(i, false);
-                players.add(player);
+                ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 
-                connections.put(player, connectionSocket);
-                inputStreams.put(player, inFromClient);
-                outputStreams.put(player, outToClient);
+                int playerId = i == 0 ? 0 : numberOfBots + i;
 
-                System.out.println("Connected to player " + i);
-                outToClient.writeObject("You connected to the server as player " + i + "\n");
+                Player player = new Player(playerId, false);
+
+                if (i == 0) players.addFirst(player);
+                else players.add(player);
+
+                connections.put(player, socket);
+                inputStreams.put(player, in);
+                outputStreams.put(player, out);
+
+                System.out.println("Connected to player " + playerId);
+                out.writeObject("You connected as Player " + playerId);
             }
         }
     }
@@ -98,29 +98,5 @@ public class GameServer {
         outputStreams.clear();
     }
 
-    public void runClient(String ipAddress) {
-        try (Socket socket = new Socket(ipAddress, 2048);
-             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-             ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
-
-            Scanner input = new Scanner(System.in);
-            String message = "";
-
-            while (!message.contains("winner")) {
-                message = (String) in.readObject();
-                System.out.println(message);
-
-                if (message.contains("Type") || message.contains("keep")) {
-                    out.writeObject(input.nextLine());
-                }
-            }
-
-        } catch (IOException e) {
-            System.err.println("Connection error: " + e.getMessage());
-
-        } catch (ClassNotFoundException e) {
-            System.err.println("Unknown message type: " + e.getMessage());
-        }
-    }
 
 }

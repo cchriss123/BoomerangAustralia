@@ -3,6 +3,7 @@ import model.Card;
 import model.Player;
 import model.Regions;
 
+
 import java.util.*;
 import java.io.*;
 import java.util.concurrent.*;
@@ -17,24 +18,26 @@ public class BoomerangAustralia {
 
     public static void main(String[] args) {
 
-        BoomerangAustralia game = new BoomerangAustralia();
+        if (args.length == 0) {
+            new GameClient().run("127.0.0.1");
+            return;
+        }
 
-        if (args.length != 1 && args.length != 2) {
+        if (args.length == 1) {
+            new GameClient().run(args[0]);
+            return;
+        }
+
+        if (args.length != 2) {
             System.out.println("""
-                    This game is for a total of 2-4 players/bots
-                    Server syntax: java BoomerangAustralia numPlayers numBots
-                    Client syntax: java BoomerangAustralia IP
-                    """);
+                This game is for a total of 2-4 players/bots
+                Server syntax: java BoomerangAustralia numPlayers numBots
+                Client syntax: java BoomerangAustralia IP
+                """);
             return;
         }
 
         try {
-
-            if (args.length == 1) {
-                game.gameServer.runClient(args[0]);
-                return;
-            }
-
             int numPlayers = Integer.parseInt(args[0]);
             int numBots = Integer.parseInt(args[1]);
 
@@ -43,9 +46,24 @@ public class BoomerangAustralia {
                 return;
             }
 
-            game.runGame(numPlayers, numBots);
+            new BoomerangAustralia().hostGame(numPlayers, numBots);
+
         } catch (NumberFormatException _) {
-            System.err.println("model.Player counts must be valid integers.");
+            System.err.println("Player counts must be valid integers.");
+        }
+    }
+
+    private void hostGame(int numPlayers, int numBots) {
+        CountDownLatch serverReady = new CountDownLatch(1);
+
+        Thread serverThread = new Thread(() -> runGame(numPlayers, numBots, serverReady));
+        serverThread.start();
+
+        try {
+            serverReady.await();
+            new GameClient().run("127.0.0.1");
+        } catch (InterruptedException _) {
+            Thread.currentThread().interrupt();
         }
     }
 
@@ -192,8 +210,6 @@ public class BoomerangAustralia {
     private List<Player> createLocalPlayers(int numBots) {
         List<Player> localPlayers = new ArrayList<>();
 
-        localPlayers.add(new Player(0, false));
-
         for (int i = 0; i < numBots; i++) {
             localPlayers.add(new Player(i + 1, true));
         }
@@ -203,7 +219,7 @@ public class BoomerangAustralia {
 
 
 
-    public void runGame(int numPlayers, int numBots) {
+    public void runGame(int numPlayers, int numBots, CountDownLatch serverReady) {
 
         List<String> regions = Regions.ALL;
 
@@ -215,7 +231,7 @@ public class BoomerangAustralia {
             Collections.shuffle(deck); //Requirement 3
 
             players.addAll(createLocalPlayers(numBots));
-            gameServer.acceptPlayers(players, numPlayers, numBots);
+            gameServer.acceptPlayers(players, numPlayers, numBots, serverReady);
             dealCardsToPlayers(deck);
 
             //Requirement 4
@@ -237,6 +253,7 @@ public class BoomerangAustralia {
         } catch (IllegalStateException e) {
             System.err.println("Game ended: " + e.getMessage());
         } catch (IOException e) {
+            serverReady.countDown();
             System.err.println(e.getMessage());
         } finally {
             gameServer.closeConnections();
