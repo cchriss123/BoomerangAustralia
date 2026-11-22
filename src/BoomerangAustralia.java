@@ -130,8 +130,6 @@ public class BoomerangAustralia {
         score.put("Animals score", countRoundAnimals);
 
         //Requirement 10e Calculate score for the Activities if the player wants to score it
-
-
         Map<String, Integer> availableActivities = getAvailableActivities(player);
 
         gameServer.sendMessage(player, "This round you have gathered the following new activities:");
@@ -209,7 +207,7 @@ public class BoomerangAustralia {
 
         List<String> regions = Regions.ALL;
 
-        ArrayList<String> finishedRegions = new ArrayList<>();
+        Set<String> finishedRegions = new LinkedHashSet<>();
 
         try {
             List<Card> deck = DeckFactory.createDeck();  //Requirement 2
@@ -222,10 +220,11 @@ public class BoomerangAustralia {
 
             //Requirement 4
             //Requirement 12 - play 4 rounds
-            for (int round = 0; round < NUMBER_OF_ROUNDS; round++) { //Requirement 11
+            for (int round = 0; round < NUMBER_OF_ROUNDS; round++) {
                 draftRound();
-                updateCompletedRegions(regions, finishedRegions); //Requirement 10b(i+ii)
-                scorePlayers(finishedRegions); //Requirement 9 & 10
+                updateCompletedRegions(regions, finishedRegions);
+                scorePlayers();
+                announceCompletedRegions(finishedRegions);
 
                 if (round < NUMBER_OF_ROUNDS - 1) {
                     prepareNextRound();
@@ -234,6 +233,7 @@ public class BoomerangAustralia {
 
             calculateFinalScores();
             announceWinner();
+
 
 
         } catch (InterruptedException e) {
@@ -343,7 +343,7 @@ public class BoomerangAustralia {
                 : players.get((playerIndex - 1 + players.size()) % players.size());
     }
 
-    private void updateCompletedRegions(List<String> regions, List<String> finishedRegions) {
+    private void updateCompletedRegions(List<String> regions, Set<String> finishedRegions) {
         for (String region : regions) {
             if (finishedRegions.contains(region)) {
                 continue;
@@ -371,7 +371,7 @@ public class BoomerangAustralia {
         }
     }
 
-    private void scorePlayers(List<String> finishedRegions) {
+    private void scorePlayers() {
         for (Player player : players) {
             player.getDraft().add(player.getHand().removeFirst()); // Catch card
 
@@ -381,8 +381,13 @@ public class BoomerangAustralia {
             """ + GameFormatter.formatCards(player.getDraft()) + "\n");
 
             scoreRound(player);
+        }
+    }
 
-            gameServer.sendMessage(player, "The following regions have now been completed: " + finishedRegions);
+    private void announceCompletedRegions(Set<String> finishedRegions) {
+        for (Player player : players) {
+            gameServer.sendMessage(player,
+                    "The following regions have now been completed: " + finishedRegions);
         }
     }
 }
