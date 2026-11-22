@@ -79,8 +79,8 @@ public class GameServer {
                 inputStreams.put(player, in);
                 outputStreams.put(player, out);
 
-                System.out.println("Connected to player " + playerId);
-                out.writeObject("You connected as Player " + playerId);
+                System.out.printf("Connected to Player %d%n", playerId + 1);
+                out.writeObject("You connected as Player " + (playerId + 1));
             }
         }
     }
