@@ -193,15 +193,18 @@ public class BoomerangAustralia {
         return 0;
     }
 
-    public void initializePlayers(int numberPlayers, int numberOfBots) throws IOException {
-        players.add(new Player(0, false));
+    private List<Player> createLocalPlayers(int numBots) {
+        List<Player> localPlayers = new ArrayList<>();
 
-        for (int i = 0; i < numberOfBots; i++) {
-            players.add(new Player(i + 1, true));
+        localPlayers.add(new Player(0, false));
+
+        for (int i = 0; i < numBots; i++) {
+            localPlayers.add(new Player(i + 1, true));
         }
 
-        gameServer.acceptPlayers(players, numberPlayers, numberOfBots);
+        return localPlayers;
     }
+
 
 
     public void initGame(int numPlayers, int numBots) {
@@ -214,9 +217,11 @@ public class BoomerangAustralia {
             List<Card> deck = DeckFactory.createDeck();  //Requirement 2
 
             Collections.shuffle(deck); //Requirement 3
-            initializePlayers(numPlayers, numBots);
-            //Requirement 4
+
+            players.addAll(createLocalPlayers(numBots));
+            gameServer.acceptPlayers(players, numPlayers, numBots);
             dealCards(deck);
+            //Requirement 4
             //Requirement 12 - play 4 rounds
             for (int round = 0; round < NUMBER_OF_ROUNDS; round++) { //Requirement 11
                 draftRound();
