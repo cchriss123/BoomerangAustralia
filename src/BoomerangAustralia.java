@@ -43,7 +43,7 @@ public class BoomerangAustralia {
                 return;
             }
 
-            game.initGame(numPlayers, numBots);
+            game.runGame(numPlayers, numBots);
         } catch (NumberFormatException _) {
             System.err.println("model.Player counts must be valid integers.");
         }
@@ -203,7 +203,7 @@ public class BoomerangAustralia {
 
 
 
-    public void initGame(int numPlayers, int numBots) {
+    public void runGame(int numPlayers, int numBots) {
 
         List<String> regions = Regions.ALL;
 
