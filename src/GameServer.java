@@ -47,9 +47,10 @@ public class GameServer {
 
         try {
             return (String) in.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Failed to read message: " + e.getMessage());
-            return "";
+        } catch (IOException _) {
+            throw new IllegalStateException("Player %d disconnected. Ending game.".formatted(player.getPlayerID()));
+        } catch (ClassNotFoundException e) {
+            throw new IllegalStateException("Invalid message received.", e);
         }
     }
 

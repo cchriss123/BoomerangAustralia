@@ -2,8 +2,6 @@ import model.Activities;
 import model.Card;
 import model.Player;
 import model.Regions;
-
-
 import java.util.*;
 import java.io.*;
 import java.util.concurrent.*;
@@ -301,17 +299,39 @@ public class BoomerangAustralia {
         }
     }
 
+
     private void executeDraftingTurn(int turn) {
         try (ExecutorService executor = Executors.newFixedThreadPool(players.size())) {
+            CompletionService<Void> tasks = new ExecutorCompletionService<>(executor);
+
+            // Let all players draft simultaneously.
             for (int p = 0; p < players.size(); p++) {
                 Player player = players.get(p);
                 Player receiver = getReceivingPlayer(p, turn);
 
-                executor.execute(() -> addCardToDraft(player, receiver));
+                tasks.submit(() -> addCardToDraft(player, receiver), null);
             }
+
+            waitForDraftingTasks(tasks);
         }
     }
 
+    private void waitForDraftingTasks(CompletionService<Void> tasks) {
+        try {
+            // Wait for all players, detecting failures as soon as a task finishes.
+            for (int i = 0; i < players.size(); i++) {
+                tasks.take().get();
+            }
+        } catch (ExecutionException e) {
+            // Close sockets to unblock other players waiting for input.
+            gameServer.closeConnections();
+            throw new IllegalStateException(e.getCause().getMessage(), e.getCause());
+        } catch (InterruptedException e) {
+            gameServer.closeConnections();
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Drafting interrupted.", e);
+        }
+    }
 
     private void passRemainingCards() {
         for (Player sendToPlayer : players) {
