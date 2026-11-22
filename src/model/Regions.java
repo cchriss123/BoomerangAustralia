@@ -8,7 +8,7 @@ public final class Regions {
     public static final String NORTHERN_TERRITORY = "Northern Territory";
     public static final String QUEENSLAND = "Queensland";
     public static final String SOUTH_AUSTRALIA = "South Australia";
-    public static final String NEW_SOUTH_WALES = "New South Whales";
+    public static final String NEW_SOUTH_WALES = "New South Wales";
     public static final String VICTORIA = "Victoria";
     public static final String TASMANIA = "Tasmania";
 
