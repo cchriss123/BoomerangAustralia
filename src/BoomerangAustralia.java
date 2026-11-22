@@ -220,7 +220,7 @@ public class BoomerangAustralia {
 
             players.addAll(createLocalPlayers(numBots));
             gameServer.acceptPlayers(players, numPlayers, numBots);
-            dealCards(deck);
+            dealCardsToPlayers(deck);
             //Requirement 4
             //Requirement 12 - play 4 rounds
             for (int round = 0; round < NUMBER_OF_ROUNDS; round++) { //Requirement 11
@@ -264,10 +264,10 @@ public class BoomerangAustralia {
             player.getDraft().clear();
             player.getHand().clear();
         }
-        dealCards(deck);
+        dealCardsToPlayers(deck);
     }
 
-    private void dealCards(List<Card> deck) {
+    private void dealCardsToPlayers(List<Card> deck) {
         for (Player player : players) {
             for (int i = 0; i < CARDS_PER_HAND; i++) {
                 player.getHand().add(deck.removeFirst());
