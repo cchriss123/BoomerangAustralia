@@ -99,6 +99,7 @@ public class GameServer {
              ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
              ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
 
+            Scanner scanner = new Scanner(System.in);
             String message = "";
 
             while (!message.contains("winner")) {

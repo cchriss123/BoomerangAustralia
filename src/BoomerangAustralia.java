@@ -234,13 +234,10 @@ public class BoomerangAustralia {
             calculateFinalScores();
             announceWinner();
 
-
-
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            System.out.println(e.getMessage());
+        } catch (IllegalStateException e) {
+            System.err.println("Game ended: " + e.getMessage());
         } catch (IOException e) {
-            System.out.println(e.getMessage());
+            System.err.println(e.getMessage());
         } finally {
             gameServer.closeConnections();
         }
@@ -275,7 +272,7 @@ public class BoomerangAustralia {
         }
     }
 
-    private void draftRound() throws InterruptedException {
+    private void draftRound(){
         for (int i = 0; i < DRAFTING_TURNS; i++) { //Requirement 8
             executeDraftingTurn(i);
             passRemainingCards();
@@ -287,26 +284,17 @@ public class BoomerangAustralia {
         }
     }
 
-    private void executeDraftingTurn(int turn) throws InterruptedException {
-        try (ExecutorService threadPool = Executors.newFixedThreadPool(players.size())) {
+    private void executeDraftingTurn(int turn) {
+        try (ExecutorService executor = Executors.newFixedThreadPool(players.size())) {
             for (int p = 0; p < players.size(); p++) {
                 Player player = players.get(p);
-                Player sendHand = getReceivingPlayer(p, turn);
+                Player receiver = getReceivingPlayer(p, turn);
 
-                //Requirement 7 - Make sure every player can draft their card at the same time
-                Runnable task = () -> addCardToDraft(player, sendHand);
-                threadPool.execute(task);
-            }
-
-            threadPool.shutdown();
-
-            //wait for all the hands to switch places
-            while (true) {
-                if (threadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS)) break;
-                // Wait until every player has finished drafting
+                executor.execute(() -> addCardToDraft(player, receiver));
             }
         }
     }
+
 
     private void passRemainingCards() {
         for (Player sendToPlayer : players) {
