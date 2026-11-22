@@ -278,7 +278,7 @@ public class BoomerangAustralia {
     private void draftRound() throws InterruptedException {
         for (int i = 0; i < DRAFTING_TURNS; i++) { //Requirement 8
             executeDraftingTurn(i);
-            passHands();
+            passRemainingCards();
 
             // Requirement 5 (Keep throw card hidden)
             if (i > 0) {
@@ -308,7 +308,7 @@ public class BoomerangAustralia {
         }
     }
 
-    private void passHands() {
+    private void passRemainingCards() {
         for (Player sendToPlayer : players) {
             sendToPlayer.getHand().clear();
             // grab the cards passed on from the previous player
