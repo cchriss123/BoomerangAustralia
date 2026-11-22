@@ -31,7 +31,7 @@ public class BoomerangAustralia {
         try {
 
             if (args.length == 1) {
-                game.gameServer.client(args[0]);
+                game.gameServer.runClient(args[0]);
                 return;
             }
 

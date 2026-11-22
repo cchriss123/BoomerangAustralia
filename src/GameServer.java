@@ -98,12 +98,12 @@ public class GameServer {
         outputStreams.clear();
     }
 
-    public void client(String ipAddress) {
+    public void runClient(String ipAddress) {
         try (Socket socket = new Socket(ipAddress, 2048);
              ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
              ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
 
-            Scanner scanner = new Scanner(System.in);
+            Scanner input = new Scanner(System.in);
             String message = "";
 
             while (!message.contains("winner")) {
@@ -111,7 +111,7 @@ public class GameServer {
                 System.out.println(message);
 
                 if (message.contains("Type") || message.contains("keep")) {
-                    out.writeObject(scanner.nextLine());
+                    out.writeObject(input.nextLine());
                 }
             }
 
