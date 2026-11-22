@@ -319,17 +319,13 @@ public class BoomerangAustralia {
     private void showDraftedCards() {
         // Requirement 7 (Show cards)
         for (int i = 0; i < players.size(); i++) {
-            Player draftedPlayer = players.get(i);
+            List<Card> draft = players.get(i).getDraft();
+            List<Card> visibleCards = draft.subList(1, draft.size());
 
-            List<Card> visibleCards = draftedPlayer.getDraft()
-                    .subList(1, draftedPlayer.getDraft().size());
+            String message = "%nPlayer %d has drafted%n%s"
+                    .formatted(i, GameFormatter.formatCards(visibleCards));
 
-            String formattedCards = GameFormatter.formatCards(visibleCards);
-
-            for (Player sendToPlayer : players) {
-                gameServer.sendMessage(sendToPlayer, "%nPlayer %d has drafted%n%s"
-                        .formatted(i, formattedCards));
-            }
+            players.forEach(player -> gameServer.sendMessage(player, message));
         }
     }
 
