@@ -88,20 +88,43 @@ public final class ScoreCalculator {
     }
 
     public static Player getHighestScoringPlayer(List<Player> players) {
-        Player highScore = players.getFirst();
+        Player winner = players.getFirst();
 
         for (Player player : players) {
-            if (player.getFinalScore() > highScore.getFinalScore()) {
-                highScore = player;
+            if (player.getFinalScore() > winner.getFinalScore()) {
+                winner = player;
+            } else if (player.getFinalScore() == winner.getFinalScore()) {
+
+                int playerThrowCatch = calculateTotal(player.getRScore(), "Throw and Catch score");
+                int winnerThrowCatch = calculateTotal(winner.getRScore(), "Throw and Catch score");
+
+                if (playerThrowCatch > winnerThrowCatch) {
+                    winner = player;
+                }
             }
         }
-        return highScore;
+        return winner;
     }
-
     public static int calculateThrowCatchScore(List<Card> draft) {
         int firstCardNumber = draft.getFirst().number();
         int lastCardNumber = draft.getLast().number();
 
         return Math.abs(firstCardNumber - lastCardNumber);
     }
+
+    public static int calculatePlayerFinalScore(Player player) {
+        int regionBonus = calculateRegionBonus(player.getCompletedRegions().size());
+        // Requirement 12
+
+        return calculateFinalScore(
+                player.getRScore(),
+                player.getActivitiesScore(),
+                regionBonus);
+    }
+
+    public static int calculateRegionBonus(int completedRegions) {
+        return completedRegions * 3;
+    }
+
+
 }

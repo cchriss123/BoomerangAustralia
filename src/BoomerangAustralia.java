@@ -180,13 +180,13 @@ public class BoomerangAustralia {
     }
 
     private int finalScore(Player player) {
-        int regionBonus = player.getCompletedRegions().size() * 3;
-        int totalScore = ScoreCalculator.calculateFinalScore(
-                player.getRScore(), player.getActivitiesScore(), regionBonus);
+        int totalScore = ScoreCalculator.calculatePlayerFinalScore(player);
 
-        //Requirement 12
         String scoreboard = GameFormatter.formatScore(
-                player.getRScore(), player.getActivitiesScore(), regionBonus);
+                player.getRScore(),
+                player.getActivitiesScore(),
+                player.getCompletedRegions().size());
+
         gameServer.sendMessage(player, scoreboard);
 
         return totalScore;
