@@ -32,8 +32,8 @@ public class GameServer {
         }
 
         try {
-            out.writeObject(message);
-        } catch (IOException e) {
+            out.writeObject(message); // Sends the message to the client over TCP.
+            } catch (IOException e) {
             System.err.println("Failed to send message: " + e.getMessage());
         }
     }

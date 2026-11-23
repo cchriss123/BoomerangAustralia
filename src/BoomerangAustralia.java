@@ -102,16 +102,14 @@ public class BoomerangAustralia {
 
     @SuppressWarnings("java:S2245")
     private String chooseCard(Player player) {
-        // Prompt the user for which cards to keep (remove from hand and add to draft)
         if (player.isBot()) {
             return player.getHand()
                     .get(ThreadLocalRandom.current().nextInt(player.getHand().size()))
                     .letter();
         }
 
-        gameServer.sendMessage(player, "Type the letter of the card to draft");
-
         while (true) {
+            gameServer.sendMessage(player, "Type the letter of the card to draft");
             String response = gameServer.readMessage(player);
 
             for (Card card : player.getHand()) {
