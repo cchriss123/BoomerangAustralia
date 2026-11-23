@@ -12,15 +12,9 @@ public final class ScoreCalculator {
     private ScoreCalculator() {}
 
     public static int countMatchingCards(List<Card> draft, String targetValue, Function<Card, String> category) {
-        int count = 0;
-
-        for (Card card : draft) {
-            if (category.apply(card).equals(targetValue)) {
-                count++;
-            }
-        }
-
-        return count;
+        return (int) draft.stream()
+                .filter(card -> category.apply(card).equals(targetValue))
+                .count();
     }
 
     private static final Map<String, Integer> ANIMAL_POINTS = Map.of(
@@ -31,13 +25,15 @@ public final class ScoreCalculator {
             Animals.PLATYPUSES, 9
     );
 
+
     public static int calculateAnimalScore(List<Card> draft) {
         int total = 0;
 
         for (Map.Entry<String, Integer> animal : ANIMAL_POINTS.entrySet()) {
-            if (countMatchingCards(draft, animal.getKey(), Card::animals) == 2) {
-                total += animal.getValue();
-            }
+            int count = countMatchingCards(draft, animal.getKey(), Card::animals);
+            int pairs = count / 2;
+
+            total += pairs * animal.getValue();
         }
 
         return total;
