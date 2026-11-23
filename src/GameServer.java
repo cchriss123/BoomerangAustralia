@@ -65,7 +65,6 @@ public class GameServer {
                 Socket socket = serverSocket.accept();
 
                 ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-
                 ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 
                 int playerId = i == 0 ? 0 : numberOfBots + i;

@@ -16,22 +16,23 @@ public class BoomerangAustralia {
 
     public static void main(String[] args) {
 
-        if (args.length == 0) {
+        if (args.length == 0) { // connect to local host as a guest client
             new GameClient().run("127.0.0.1");
             return;
         }
 
-        if (args.length == 1) {
+        if (args.length == 1) { // connect to IP as a guest client
             new GameClient().run(args[0]);
             return;
         }
 
-        if (args.length != 2) {
+        if (args.length > 2) {
             System.out.println("""
-                This game is for a total of 2-4 players/bots
-                Server syntax: java BoomerangAustralia numPlayers numBots
-                Client syntax: java BoomerangAustralia IP
-                """);
+            This game requires 2-4 players/bots.
+
+            Host:   java BoomerangAustralia numPlayers numBots
+            Join:   java BoomerangAustralia [IP]
+            """);
             return;
         }
 
@@ -54,12 +55,11 @@ public class BoomerangAustralia {
     private void hostGame(int numPlayers, int numBots) {
         CountDownLatch serverReady = new CountDownLatch(1);
 
-        Thread serverThread = new Thread(() -> runGame(numPlayers, numBots, serverReady));
-        serverThread.start();
+        new Thread(() -> runGame(numPlayers, numBots, serverReady)).start();
 
         try {
             serverReady.await();
-            new GameClient().run("127.0.0.1");
+            new GameClient().run("127.0.0.1"); // Host joins as a client when the server is ready
         } catch (InterruptedException _) {
             Thread.currentThread().interrupt();
         }
