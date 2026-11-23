@@ -9,10 +9,7 @@ public final class GameFormatter {
 
     private GameFormatter() {}
 
-    public static String formatScore(
-            List<Map<String, Integer>> rScore,
-            Map<String, Integer> activitiesScore,
-            int regionBonus) {
+    public static String formatScore(List<Map<String, Integer>> rScore, Map<String, Integer> activitiesScore, int regionBonus) {
 
         List<String> categories = List.of(
                 "Throw and Catch score",
@@ -21,51 +18,55 @@ public final class GameFormatter {
                 "Animals score"
         );
 
+        String categoryHeader = "Category";
+        int categoryWidth = categoryHeader.length();
+
+        for (String category : categories) {
+            categoryWidth = Math.max(categoryWidth, category.length());
+        }
+
         StringBuilder sb = new StringBuilder();
 
-        sb.append("""
-                
-                ========== SCOREBOARD ==========
+        // Same width for every section divider
+        int lineWidth = categoryWidth + 29;
+        String divider = "-".repeat(lineWidth);
 
-                Category | Round 1 | Round 2 | Round 3 | Round 4 | Total
-                -------------------------------------------------------
-                """);
+        sb.append("\n=================== SCOREBOARD ===================\n\n");
+
+        sb.append(categoryHeader);
+        sb.append(" ".repeat(categoryWidth - categoryHeader.length()));
+        sb.append(" | R1 | R2 | R3 | R4 | Total\n");
+        sb.append(divider).append("\n");
 
         for (String category : categories) {
             sb.append(category);
+            sb.append(" ".repeat(categoryWidth - category.length()));
 
             for (Map<String, Integer> round : rScore) {
-                sb.append(" | ");
-                sb.append(round.get(category));
+                String points = String.valueOf(round.get(category));
+                sb.append(" | ").append(points);
+                sb.append(" ".repeat(Math.max(0, 2 - points.length())));
             }
 
             int total = ScoreCalculator.calculateTotal(rScore, category);
-            sb.append(" | Total: ").append(total).append("\n");
+            sb.append(" | ").append(total).append("\n");
         }
 
-        sb.append("""
-                
-                ACTIVITIES
-                ------------------------------
-                """);
+        sb.append("\nACTIVITIES\n");
+        sb.append(divider).append("\n");
 
         int totalActivities = 0;
 
         for (String activity : Activities.ALL) {
             int points = activitiesScore.getOrDefault(activity, 0);
-
             sb.append(activity).append(": ").append(points).append("\n");
-
             totalActivities += points;
         }
 
         sb.append("Activities total: ").append(totalActivities).append("\n");
 
-        sb.append("""
-                
-                BONUSES & TOTAL
-                ------------------------------
-                """);
+        sb.append("\nBONUSES & TOTAL\n");
+        sb.append(divider).append("\n");
 
         sb.append("Region bonuses: ").append(regionBonus).append("\n");
 
@@ -77,6 +78,7 @@ public final class GameFormatter {
 
         return sb.toString();
     }
+
 
     public static String formatCards(List<Card> cards) {
         if (cards.isEmpty()) {

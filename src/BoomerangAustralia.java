@@ -85,9 +85,14 @@ public class BoomerangAustralia {
         }
 
         if (!player.getSites().isEmpty()) {
-            TreeMap<String, String> sortedSites = new TreeMap<>(player.getSites());
-            gameServer.sendMessage(player, "Sites from previous rounds:%n%s%n"
-                    .formatted(sortedSites));
+            StringBuilder sb = new StringBuilder("Sites from previous rounds:\n");
+
+            for (Map.Entry<String, String> site : player.getSites().entrySet()) {
+                sb.append("[").append(site.getKey()).append("] ");
+                sb.append(site.getValue()).append("\n");
+            }
+
+            gameServer.sendMessage(player, sb.toString());
         }
 
         // Print the list of cards in the hand
@@ -182,7 +187,7 @@ public class BoomerangAustralia {
         //Requirement 12
         String scoreboard = GameFormatter.formatScore(
                 player.getRScore(), player.getActivitiesScore(), regionBonus);
-        gameServer.sendMessage(player, "\n*********************************************\n" + scoreboard);
+        gameServer.sendMessage(player, scoreboard);
 
         return totalScore;
     }
