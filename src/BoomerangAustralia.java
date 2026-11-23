@@ -161,6 +161,9 @@ public class BoomerangAustralia {
 
         player.getRScore().add(score);
         player.setRegionRoundScore(0); //it has been added to the region list, and will be summed up at the end of the 4 rounds.
+        //Requirement 11
+        int totalScore = ScoreCalculator.calculatePlayerFinalScore(player);
+        gameServer.sendMessage(player, "Your current total score is %d".formatted(totalScore));
 
     }
 
