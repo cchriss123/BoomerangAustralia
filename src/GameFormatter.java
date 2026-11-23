@@ -1,4 +1,4 @@
-
+import model.Activities;
 import model.Card;
 
 import java.util.List;
@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public final class GameFormatter {
+
+    private static final String SCORE_ROW_FORMAT = "%-25s %5d%n";
 
     private GameFormatter() {}
 
@@ -20,13 +22,6 @@ public final class GameFormatter {
                 "CollectionTypes score",
                 "Animals score"
         );
-
-        String[] activities = {
-                "Indigenous Culture",
-                "Bushwalking",
-                "Swimming",
-                "Sightseeing"
-        };
 
         StringBuilder sb = new StringBuilder();
 
@@ -55,20 +50,20 @@ public final class GameFormatter {
 
         int totalActivities = 0;
 
-        for (String activity : activities) {
+        for (String activity : Activities.ALL) {
             int points = activitiesScore.getOrDefault(activity, 0);
-            sb.append("%-25s %5d%n".formatted(activity, points));
+            sb.append(SCORE_ROW_FORMAT.formatted(activity, points));
             totalActivities += points;
         }
 
-        sb.append("%-25s %5d%n".formatted(
+        sb.append(SCORE_ROW_FORMAT.formatted(
                 "Activities total", totalActivities
         ));
 
         sb.append("\nBONUSES & TOTAL\n");
         sb.append("-".repeat(35)).append("\n");
 
-        sb.append("%-25s %5d%n".formatted(
+        sb.append(SCORE_ROW_FORMAT.formatted(
                 "Region bonuses", regionBonus
         ));
 
