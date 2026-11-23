@@ -1,6 +1,6 @@
 package model;
 
-import java.util.List;
+import java.util.Map;
 
 public final class CollectionTypes {
 
@@ -9,11 +9,11 @@ public final class CollectionTypes {
     public static final String WILDFLOWERS = "Wildflowers";
     public static final String SOUVENIRS = "Souvenirs";
 
-    public static final List<String> ALL = List.of(
-            LEAVES,
-            WILDFLOWERS,
-            SHELLS,
-            SOUVENIRS
+    public static final Map<String, Integer> POINTS = Map.of(
+            LEAVES, 1,
+            WILDFLOWERS, 2,
+            SHELLS, 3,
+            SOUVENIRS, 5
     );
 
     private CollectionTypes() {}

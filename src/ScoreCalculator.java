@@ -44,19 +44,14 @@ public final class ScoreCalculator {
     }
 
 
-
     public static int calculateCollectionScore(List<Card> draft) {
-        int total = 0;
+        int total = draft.stream()
+                .mapToInt(card -> CollectionTypes.POINTS.getOrDefault(card.collections(), 0))
+                .sum();
 
-        for (String collection : CollectionTypes.ALL) {
-            int matchingCardCount = countMatchingCards(draft, collection, Card::collections);
-            int points = (matchingCardCount < 8) ? matchingCardCount * 2 : matchingCardCount;
-
-            total += points;
-        }
-
-        return total;
+        return (total > 0 && total < 8) ? total * 2 : total;
     }
+
 
 
     public static int calculateTotal(List<Map<String, Integer>> roundScores, String category) {
