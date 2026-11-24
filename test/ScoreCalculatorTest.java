@@ -27,10 +27,10 @@ class ScoreCalculatorTest {
     @ParameterizedTest
     @MethodSource("throwCatchArguments")
     void throwCatchScore(int firstNumber, int lastNumber, int expectedScore) {
-        Card first = new Card("Sydney Opera House", "A", Regions.NEW_SOUTH_WALES, firstNumber, "", "", "");
-        Card last = new Card("Bondi Beach", "B", Regions.NEW_SOUTH_WALES, lastNumber, "", "", "");
+        Card cardA = new Card("Sydney Opera House", "A", Regions.NEW_SOUTH_WALES, firstNumber, "", "", "");
+        Card cardB = new Card("Bondi Beach", "B", Regions.NEW_SOUTH_WALES, lastNumber, "", "", "");
 
-        assertEquals(expectedScore, ScoreCalculator.calculateThrowCatchScore(List.of(first, last)));
+        assertEquals(expectedScore, ScoreCalculator.calculateThrowCatchScore(List.of(cardA, cardB)));
     }
 
     static Stream<Arguments> throwCatchArguments() {
@@ -61,10 +61,10 @@ class ScoreCalculatorTest {
     @ParameterizedTest
     @MethodSource("collectionScoreArguments")
     void collectionScore(String firstCollection, String secondCollection, int expectedScore) {
-        Card first = new Card("Sydney Opera House", "A", Regions.NEW_SOUTH_WALES, 1, firstCollection, "", "");
-        Card second = new Card("Bondi Beach", "B", Regions.NEW_SOUTH_WALES, 2, secondCollection, "", "");
+        Card cardA = new Card("Sydney Opera House", "A", Regions.NEW_SOUTH_WALES, 1, firstCollection, "", "");
+        Card cardB = new Card("Bondi Beach", "B", Regions.NEW_SOUTH_WALES, 2, secondCollection, "", "");
 
-        assertEquals(expectedScore, ScoreCalculator.calculateCollectionScore(List.of(first, second)));
+        assertEquals(expectedScore, ScoreCalculator.calculateCollectionScore(List.of(cardA, cardB)));
     }
 
     static Stream<Arguments> collectionScoreArguments() {
@@ -97,10 +97,10 @@ class ScoreCalculatorTest {
 
     @Test
     void animalScoreWithoutPair() {
-        Card first = new Card("Sydney Opera House", "A", Regions.NEW_SOUTH_WALES, 1, "", Animals.KOALAS, "");
-        Card second = new Card("Bondi Beach", "B", Regions.NEW_SOUTH_WALES, 2, "", Animals.EMUS, "");
+        Card cardA = new Card("Sydney Opera House", "A", Regions.NEW_SOUTH_WALES, 1, "", Animals.KOALAS, "");
+        Card cardB = new Card("Bondi Beach", "B", Regions.NEW_SOUTH_WALES, 2, "", Animals.EMUS, "");
 
-        assertEquals(0, ScoreCalculator.calculateAnimalScore(List.of(first, second)));
+        assertEquals(0, ScoreCalculator.calculateAnimalScore(List.of(cardA, cardB)));
     }
 
     @ParameterizedTest
@@ -127,10 +127,10 @@ class ScoreCalculatorTest {
     @ParameterizedTest
     @MethodSource("animalScoreArguments")
     void animalScoreForEachPair(String animal, int expectedScore) {
-        Card first = new Card("Sydney Opera House", "A", Regions.NEW_SOUTH_WALES, 1, "", animal, "");
-        Card second = new Card("Bondi Beach", "B", Regions.NEW_SOUTH_WALES, 2, "", animal, "");
+        Card cardA = new Card("Sydney Opera House", "A", Regions.NEW_SOUTH_WALES, 1, "", animal, "");
+        Card cardB = new Card("Bondi Beach", "B", Regions.NEW_SOUTH_WALES, 2, "", animal, "");
 
-        assertEquals(expectedScore, ScoreCalculator.calculateAnimalScore(List.of(first, second)));
+        assertEquals(expectedScore, ScoreCalculator.calculateAnimalScore(List.of(cardA, cardB)));
     }
 
     static Stream<Arguments> animalScoreArguments() {

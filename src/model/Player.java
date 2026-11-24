@@ -20,9 +20,9 @@ public class Player {
         this.isBot = isBot;
     }
 
-    public void draftCard(String letter) {
+    public void draftCard(String selectionLetter) {
         for (Card card : hand) {
-            if (card.selectionLetter().equalsIgnoreCase(letter)) {
+            if (card.selectionLetter().equalsIgnoreCase(selectionLetter)) {
                 hand.remove(card);
                 draft.add(card);
                 return;
