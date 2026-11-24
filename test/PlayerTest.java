@@ -1,5 +1,6 @@
 import model.Card;
 import model.Player;
+import model.Regions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -24,9 +25,9 @@ class PlayerTest {
     void countNewSitesAcrossRounds() {
         Player player = new Player(0, false);
 
-        Card first = new Card("Test A", "A", "Region A", 1, "", "", "");
-        Card second = new Card("Test B", "B", "Region A", 2, "", "", "");
-        Card third = new Card("Test C", "C", "Region A", 3, "", "", "");
+        Card first = new Card("Sydney Opera House", "A", Regions.NEW_SOUTH_WALES, 1, "", "", "");
+        Card second = new Card("Bondi Beach", "B", Regions.NEW_SOUTH_WALES, 2, "", "", "");
+        Card third = new Card("Blue Mountains", "C", Regions.NEW_SOUTH_WALES, 3, "", "", "");
 
         player.getDraft().addAll(List.of(first, second));
 
@@ -57,8 +58,8 @@ class PlayerTest {
 
         Player player = new Player(0, false);
 
-        Card first = new Card("Test A", "A", "", 1, "", "", "");
-        Card second = new Card("Test B", "B", "", 2, "", "", "");
+        Card first = new Card("Sydney Opera House", "A", Regions.NEW_SOUTH_WALES, 1, "", "", "");
+        Card second = new Card("Bondi Beach", "B", Regions.NEW_SOUTH_WALES, 2, "", "", "");
 
         player.getHand().addAll(List.of(first, second));
 
@@ -69,8 +70,8 @@ class PlayerTest {
     }
 
     static Stream<Arguments> draftArguments() {
-        Card first = new Card("Test A", "A", "", 1, "", "", "");
-        Card second = new Card("Test B", "B", "", 2, "", "", "");
+        Card first = new Card("Sydney Opera House", "A", Regions.NEW_SOUTH_WALES, 1, "", "", "");
+        Card second = new Card("Bondi Beach", "B", Regions.NEW_SOUTH_WALES, 2, "", "", "");
 
         return Stream.of(
                 Arguments.of("A", List.of(second), List.of(first)),

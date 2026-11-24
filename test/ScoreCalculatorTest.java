@@ -1,6 +1,7 @@
 import model.Animals;
 import model.Card;
 import model.CollectionTypes;
+import model.Regions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -26,8 +27,8 @@ class ScoreCalculatorTest {
     @ParameterizedTest
     @MethodSource("throwCatchArguments")
     void throwCatchScore(int firstNumber, int lastNumber, int expectedScore) {
-        Card first = new Card("Test A", "A", "", firstNumber, "", "", "");
-        Card last = new Card("Test B", "B", "", lastNumber, "", "", "");
+        Card first = new Card("Sydney Opera House", "A", Regions.NEW_SOUTH_WALES, firstNumber, "", "", "");
+        Card last = new Card("Bondi Beach", "B", Regions.NEW_SOUTH_WALES, lastNumber, "", "", "");
 
         assertEquals(expectedScore, ScoreCalculator.calculateThrowCatchScore(List.of(first, last)));
     }
@@ -60,8 +61,8 @@ class ScoreCalculatorTest {
     @ParameterizedTest
     @MethodSource("collectionScoreArguments")
     void collectionScore(String firstCollection, String secondCollection, int expectedScore) {
-        Card first = new Card("Test A", "A", "", 1, firstCollection, "", "");
-        Card second = new Card("Test B", "B", "", 2, secondCollection, "", "");
+        Card first = new Card("Sydney Opera House", "A", Regions.NEW_SOUTH_WALES, 1, firstCollection, "", "");
+        Card second = new Card("Bondi Beach", "B", Regions.NEW_SOUTH_WALES, 2, secondCollection, "", "");
 
         assertEquals(expectedScore, ScoreCalculator.calculateCollectionScore(List.of(first, second)));
     }
@@ -96,8 +97,8 @@ class ScoreCalculatorTest {
 
     @Test
     void animalScoreWithoutPair() {
-        Card first = new Card("Test A", "A", "", 1, "", Animals.KOALAS, "");
-        Card second = new Card("Test B", "B", "", 2, "", Animals.EMUS, "");
+        Card first = new Card("Sydney Opera House", "A", Regions.NEW_SOUTH_WALES, 1, "", Animals.KOALAS, "");
+        Card second = new Card("Bondi Beach", "B", Regions.NEW_SOUTH_WALES, 2, "", Animals.EMUS, "");
 
         assertEquals(0, ScoreCalculator.calculateAnimalScore(List.of(first, second)));
     }
@@ -108,7 +109,7 @@ class ScoreCalculatorTest {
         List<Card> draft = new ArrayList<>();
 
         for (int i = 0; i < count; i++) {
-            draft.add(new Card("Test", "", "", 1, "", Animals.KOALAS, ""));
+            draft.add(new Card("Blue Mountains", "", Regions.NEW_SOUTH_WALES, 1, "", Animals.KOALAS, ""));
         }
 
         assertEquals(expectedScore, ScoreCalculator.calculateAnimalScore(draft));
@@ -126,8 +127,8 @@ class ScoreCalculatorTest {
     @ParameterizedTest
     @MethodSource("animalScoreArguments")
     void animalScoreForEachPair(String animal, int expectedScore) {
-        Card first = new Card("Test A", "A", "", 1, "", animal, "");
-        Card second = new Card("Test B", "B", "", 2, "", animal, "");
+        Card first = new Card("Sydney Opera House", "A", Regions.NEW_SOUTH_WALES, 1, "", animal, "");
+        Card second = new Card("Bondi Beach", "B", Regions.NEW_SOUTH_WALES, 2, "", animal, "");
 
         assertEquals(expectedScore, ScoreCalculator.calculateAnimalScore(List.of(first, second)));
     }

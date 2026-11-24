@@ -1,4 +1,5 @@
 import model.Card;
+import model.Regions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -28,20 +29,20 @@ class RegionCheckerTest {
 
         assertEquals(
                 expectedResult,
-                RegionChecker.isRegionComplete("Region A", sites, draft)
+                RegionChecker.isRegionComplete(Regions.NEW_SOUTH_WALES, sites, draft)
         );
     }
 
     static Stream<Arguments> regionArguments() {
         Map<String, String> sites = Map.of(
-                "A", "Region A",
-                "B", "Region A",
-                "C", "Region A"
+                "A", Regions.NEW_SOUTH_WALES,
+                "B", Regions.NEW_SOUTH_WALES,
+                "C", Regions.NEW_SOUTH_WALES
         );
 
-        Card newSite = new Card("Test D", "D", "Region A", 1, "", "", "");
-        Card duplicate = new Card("Test A", "A", "Region A", 1, "", "", "");
-        Card otherRegion = new Card("Test E", "E", "Region B", 1, "", "", "");
+        Card newSite = new Card("Test D", "D", Regions.NEW_SOUTH_WALES, 1, "", "", "");
+        Card duplicate = new Card("Test A", "A", Regions.NEW_SOUTH_WALES, 1, "", "", "");
+        Card otherRegion = new Card("Test E", "E", Regions.QUEENSLAND, 1, "", "", "");
 
         return Stream.of(
                 Arguments.of(sites, List.of(), false),
