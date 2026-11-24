@@ -42,7 +42,7 @@ public final class ScoreCalculator {
 
     public static int calculateCollectionScore(List<Card> draft) {
         int total = draft.stream()
-                .mapToInt(card -> CollectionTypes.POINTS.getOrDefault(card.collections(), 0))
+                .mapToInt(card -> CollectionTypes.POINTS.getOrDefault(card.collectionType(), 0))
                 .sum();
 
         return (total > 0 && total < 8) ? total * 2 : total;

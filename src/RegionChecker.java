@@ -18,7 +18,7 @@ public final class RegionChecker {
 
         for (Card card : draft) {
             if (card.region().equals(region)) {
-                collectedSites.add(card.letter());
+                collectedSites.add(card.selectionLetter());
             }
         }
 

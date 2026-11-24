@@ -22,7 +22,7 @@ public class Player {
 
     public void draftCard(String letter) {
         for (Card card : hand) {
-            if (card.letter().equalsIgnoreCase(letter)) {
+            if (card.selectionLetter().equalsIgnoreCase(letter)) {
                 hand.remove(card);
                 draft.add(card);
                 return;
@@ -34,9 +34,9 @@ public class Player {
         int thisRoundSites = 0;
 
         for (Card draftCard : draft) {
-            if (!sites.containsKey(draftCard.letter())) {
+            if (!sites.containsKey(draftCard.selectionLetter())) {
                 thisRoundSites++;
-                sites.put(draftCard.letter(), draftCard.region());
+                sites.put(draftCard.selectionLetter(), draftCard.region());
             }
         }
 

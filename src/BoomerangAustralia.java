@@ -106,7 +106,7 @@ public class BoomerangAustralia {
         if (player.isBot()) {
             return player.getHand()
                     .get(ThreadLocalRandom.current().nextInt(player.getHand().size()))
-                    .letter();
+                    .selectionLetter();
         }
 
         while (true) {
@@ -114,7 +114,7 @@ public class BoomerangAustralia {
             String response = gameServer.readMessage(player);
 
             for (Card card : player.getHand()) {
-                if (card.letter().equalsIgnoreCase(response)) {
+                if (card.selectionLetter().equalsIgnoreCase(response)) {
                     return response;
                 }
             }

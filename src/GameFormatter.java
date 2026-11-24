@@ -89,11 +89,11 @@ public final class GameFormatter {
 
         for (Card card : cards) {
             sb.append("\n");
-            sb.append("[").append(card.letter()).append("] ");
-            sb.append(card.name()).append(" (").append(card.throwCatchValue()).append(")\n");
+            sb.append("[").append(card.selectionLetter()).append("] ");
+            sb.append(card.siteName()).append(" (").append(card.throwCatchValue()).append(")\n");
 
             sb.append("    Region: ").append(card.region()).append("\n");
-            sb.append("    Collections: ").append(card.collections()).append("\n");
+            sb.append("    Collections: ").append(card.collectionType()).append("\n");
             sb.append("    Animals: ").append(card.animals()).append("\n");
             sb.append("    Activities: ").append(card.activities()).append("\n");
         }

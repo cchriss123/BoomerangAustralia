@@ -1,11 +1,11 @@
 package model;
 
 public record Card(
-        String name,
-        String letter,
+        String siteName,
+        String selectionLetter,
         String region,
         int throwCatchValue,
-        String collections,
+        String collectionType,
         String animals,
         String activities
 ) { }
