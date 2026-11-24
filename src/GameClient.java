@@ -1,6 +1,9 @@
+import model.GameMessage;
+
 import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
+import model.MessageType;
 
 public class GameClient {
 
@@ -10,14 +13,16 @@ public class GameClient {
              ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
 
             Scanner input = new Scanner(System.in);
-            String message = "";
 
-            while (!message.contains("winner")) {
-                message = (String) in.readObject();
-                System.out.println(message);
+            while (true) {
+                GameMessage message = (GameMessage) in.readObject();
 
-                if (message.contains("Type") || message.contains("keep")) {
+                System.out.println(message.text());
+
+                if (message.type() == MessageType.REQUEST_INPUT) {
                     out.writeObject(input.nextLine());
+                } else if (message.type() == MessageType.GAME_OVER) {
+                    return;
                 }
             }
 

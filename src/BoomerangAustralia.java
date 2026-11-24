@@ -1,5 +1,6 @@
 import model.Activities;
 import model.Card;
+import model.MessageType;
 import model.Player;
 import model.Regions;
 import java.util.*;
@@ -78,9 +79,9 @@ public class BoomerangAustralia {
     private void showDraftingOptions(Player player) {
         // Print the list of cards in the draft
         if (player.getDraft().isEmpty()) {
-            gameServer.sendMessage(player, "You haven't drafted any cards yet");
+            gameServer.sendMessage(player, MessageType.DISPLAY_MESSAGE, "You haven't drafted any cards yet");
         } else {
-            gameServer.sendMessage(player, "%n********************************%nYour current draft: %n%s"
+            gameServer.sendMessage(player, MessageType.DISPLAY_MESSAGE, "%n********************************%nYour current draft: %n%s"
                     .formatted(GameFormatter.formatCards(player.getDraft())));
         }
 
@@ -92,11 +93,11 @@ public class BoomerangAustralia {
                 sb.append(site.getValue()).append("\n");
             }
 
-            gameServer.sendMessage(player, sb.toString());
+            gameServer.sendMessage(player, MessageType.DISPLAY_MESSAGE, sb.toString());
         }
 
         // Print the list of cards in the hand
-        gameServer.sendMessage(player, "%nYour current hand: %n%s"
+        gameServer.sendMessage(player, MessageType.DISPLAY_MESSAGE, "%nYour current hand: %n%s"
                 .formatted(GameFormatter.formatCards(player.getHand())));
     }
 
@@ -109,7 +110,7 @@ public class BoomerangAustralia {
         }
 
         while (true) {
-            gameServer.sendMessage(player, "Type the letter of the card to draft");
+            gameServer.sendMessage(player, MessageType.REQUEST_INPUT, "Type the letter of the card to draft");
             String response = gameServer.readMessage(player);
 
             for (Card card : player.getHand()) {
@@ -118,7 +119,7 @@ public class BoomerangAustralia {
                 }
             }
 
-            gameServer.sendMessage(player, "Invalid card. Choose a card from your hand.");
+            gameServer.sendMessage(player, MessageType.DISPLAY_MESSAGE, "Invalid card. Choose a card from your hand.");
         }
     }
 
@@ -129,30 +130,30 @@ public class BoomerangAustralia {
         //Requirement 10a
         int throwCatchScore = ScoreCalculator.calculateThrowCatchScore(player.getDraft());
 
-        gameServer.sendMessage(player, "This round you scored %d as your Throw and catch score".formatted(throwCatchScore));
+        gameServer.sendMessage(player, MessageType.DISPLAY_MESSAGE, "This round you scored %d as your Throw and catch score".formatted(throwCatchScore));
         score.put("Throw and Catch score", throwCatchScore);
 
         //Requirement 10b
         int thisRoundSites = player.countNewSites();
-        gameServer.sendMessage(player, "This round you scored %d new sites points and %d points for completing regions"
+        gameServer.sendMessage(player, MessageType.DISPLAY_MESSAGE, "This round you scored %d new sites points and %d points for completing regions"
                 .formatted(thisRoundSites, player.getRegionRoundScore()));
         score.put("Tourist sites score", thisRoundSites);
 
         //Requirement 10c - Calculate score for CollectionTypes
         int countRoundCollections = ScoreCalculator.calculateCollectionScore(player.getDraft());
-        gameServer.sendMessage(player, "This round you scored %d collection points".formatted(countRoundCollections));
+        gameServer.sendMessage(player, MessageType.DISPLAY_MESSAGE, "This round you scored %d collection points".formatted(countRoundCollections));
         score.put("Collection score", countRoundCollections);
 
         //Requirement 10d Calculate score for
         int countRoundAnimals = ScoreCalculator.calculateAnimalScore(player.getDraft());
-        gameServer.sendMessage(player, "This round you scored %d animal points".formatted(countRoundAnimals));
+        gameServer.sendMessage(player, MessageType.DISPLAY_MESSAGE, "This round you scored %d animal points".formatted(countRoundAnimals));
         score.put("Animals score", countRoundAnimals);
 
         //Requirement 10e Calculate score for the Activities if the player wants to score it
         Map<String, Integer> availableActivities = getAvailableActivities(player);
 
-        gameServer.sendMessage(player, "This round you have gathered the following new activities:");
-        gameServer.sendMessage(player, "%s\nSelect if you wish to score one of them"
+        gameServer.sendMessage(player, MessageType.DISPLAY_MESSAGE, "This round you have gathered the following new activities:");
+        gameServer.sendMessage(player, MessageType.DISPLAY_MESSAGE, "%s\nSelect if you wish to score one of them"
                 .formatted(GameFormatter.formatActivities(availableActivities)));
 
         scoreActivities(player, availableActivities);
@@ -161,7 +162,7 @@ public class BoomerangAustralia {
         player.setRegionRoundScore(0); //it has been added to the region list, and will be summed up at the end of the 4 rounds.
         //Requirement 11
         int totalScore = ScoreCalculator.calculatePlayerFinalScore(player);
-        gameServer.sendMessage(player, "Your current total score is %d".formatted(totalScore));
+        gameServer.sendMessage(player, MessageType.DISPLAY_MESSAGE, "Your current total score is %d".formatted(totalScore));
 
     }
 
@@ -188,7 +189,7 @@ public class BoomerangAustralia {
                 player.getActivitiesScore(),
                 player.getCompletedRegions().size());
 
-        gameServer.sendMessage(player, scoreboard);
+        gameServer.sendMessage(player, MessageType.DISPLAY_MESSAGE, scoreboard);
 
         return totalScore;
     }
@@ -197,13 +198,13 @@ public class BoomerangAustralia {
         for (Map.Entry<String, Integer> activity : newActivitiesMap.entrySet()) {
             int activityScore = ScoreCalculator.calculateActivityScore(activity.getValue());
 
-            gameServer.sendMessage(player, "Want to keep %s(%d) [%d points]? (Y/N)"
+            gameServer.sendMessage(player, MessageType.REQUEST_INPUT, "Want to keep %s(%d) [%d points]? (Y/N)"
                     .formatted(activity.getKey(), activity.getValue(), activityScore));
             String response = player.isBot() ? "Y" : gameServer.readMessage(player);
 
             if (response.equalsIgnoreCase("Y")) {
                 player.getActivitiesScore().put(activity.getKey(), activityScore);
-                gameServer.sendMessage(player, "This round you scored this activity: %s[%d points]"
+                gameServer.sendMessage(player, MessageType.DISPLAY_MESSAGE, "This round you scored this activity: %s[%d points]"
                         .formatted(activity.getKey(), activityScore));
 
                 return; //Requirement 10e(i) Only one activity can be scored per round
@@ -269,7 +270,7 @@ public class BoomerangAustralia {
         Player highScore = ScoreCalculator.getHighestScoringPlayer(players);
 
         for (Player player : players) {
-            gameServer.sendMessage(player, "The winner is player: %d with %d points"
+            gameServer.sendMessage(player, MessageType.GAME_OVER, "The winner is player: %d with %d points"
                     .formatted(players.indexOf(highScore), highScore.getFinalScore()));
         }
     }
@@ -356,7 +357,7 @@ public class BoomerangAustralia {
             String message = "%nPlayer %d has drafted%n%s"
                     .formatted(i, GameFormatter.formatCards(visibleCards));
 
-            players.forEach(player -> gameServer.sendMessage(player, message));
+            players.forEach(player -> gameServer.sendMessage(player, MessageType.DISPLAY_MESSAGE, message));
         }
     }
 
@@ -402,7 +403,7 @@ public class BoomerangAustralia {
         for (Player player : players) {
             player.getDraft().add(player.getHand().removeFirst()); // Catch card
 
-            gameServer.sendMessage(player, """
+            gameServer.sendMessage(player, MessageType.DISPLAY_MESSAGE, """
             ********************************
             Your draft this round:
             """ + GameFormatter.formatCards(player.getDraft()) + "\n");
@@ -413,7 +414,7 @@ public class BoomerangAustralia {
 
     private void announceCompletedRegions(Set<String> finishedRegions) {
         for (Player player : players) {
-            gameServer.sendMessage(player,
+            gameServer.sendMessage(player, MessageType.DISPLAY_MESSAGE,
                     "The following regions have now been completed: " + finishedRegions);
         }
     }

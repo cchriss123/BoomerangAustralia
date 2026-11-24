@@ -1,3 +1,5 @@
+import model.GameMessage;
+import model.MessageType;
 import model.Player;
 
 import java.io.ObjectInputStream;
@@ -19,7 +21,8 @@ public class GameServer {
     private final Scanner scanner = new Scanner(System.in);
 
 
-    public void sendMessage(Player player, Object message) {
+
+    public void sendMessage(Player player, MessageType type, String text) {
         if (player.isBot()) {
             return;
         }
@@ -27,16 +30,17 @@ public class GameServer {
         ObjectOutputStream out = outputStreams.get(player);
 
         if (out == null) {
-            System.out.println(message);
+            System.out.println(text);
             return;
         }
 
         try {
-            out.writeObject(message); // Sends the message to the client over TCP.
-            } catch (IOException e) {
+            out.writeObject(new GameMessage(type, text));
+        } catch (IOException e) {
             System.err.println("Failed to send message: " + e.getMessage());
         }
     }
+
 
     public String readMessage(Player player) {
         ObjectInputStream in = inputStreams.get(player);
