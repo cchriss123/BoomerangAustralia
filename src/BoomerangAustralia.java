@@ -212,14 +212,14 @@ public class BoomerangAustralia {
         }
     }
 
-    private List<Player> createLocalPlayers(int numBots) {
-        List<Player> localPlayers = new ArrayList<>();
+    private List<Player> createBots(int numBots) {
+        List<Player> bots = new ArrayList<>();
 
         for (int i = 0; i < numBots; i++) {
-            localPlayers.add(new Player(i + 1, true));
+            bots.add(new Player(players.size() + i, true));
         }
 
-        return localPlayers;
+        return bots;
     }
 
 
@@ -235,9 +235,11 @@ public class BoomerangAustralia {
 
             Collections.shuffle(deck); //Requirement 3
 
-            players.addAll(createLocalPlayers(numBots));
-            gameServer.acceptPlayers(players, numPlayers, numBots, serverReady);
+            gameServer.acceptPlayers(players, numPlayers, serverReady);
+            players.addAll(createBots(numBots));
+
             dealCardsToPlayers(deck);
+
 
             //Requirement 4
             //Requirement 12 - play 4 rounds
@@ -297,7 +299,7 @@ public class BoomerangAustralia {
     private void draftRound(){
         for (int i = 0; i < DRAFTING_TURNS; i++) { //Requirement 8
             executeDraftingTurn(i);
-            passRemainingCards();
+            updatePlayerHands();
 
             // Requirement 5 (Keep throw card hidden)
             if (i > 0) {
@@ -340,11 +342,11 @@ public class BoomerangAustralia {
         }
     }
 
-    private void passRemainingCards() {
-        for (Player sendToPlayer : players) {
-            sendToPlayer.getHand().clear();
+    private void updatePlayerHands() {
+        for (Player player : players) {
+            player.getHand().clear();
             // grab the cards passed on from the previous player
-            sendToPlayer.getHand().addAll(sendToPlayer.getNextHand());
+            player.getHand().addAll(player.getNextHand());
         }
     }
 

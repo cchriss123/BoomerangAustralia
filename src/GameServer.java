@@ -58,7 +58,7 @@ public class GameServer {
         }
     }
 
-    public void acceptPlayers(List<Player> players, int numberPlayers, int numberOfBots, CountDownLatch serverReady) throws IOException {
+    public void acceptPlayers(List<Player> players, int numberPlayers, CountDownLatch serverReady) throws IOException {
 
         try (ServerSocket serverSocket = new ServerSocket(2048)) {
             serverReady.countDown();
@@ -71,19 +71,15 @@ public class GameServer {
                 ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
                 ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 
-                int playerId = i == 0 ? 0 : numberOfBots + i;
-
-                Player player = new Player(playerId, false);
-
-                if (i == 0) players.addFirst(player);
-                else players.add(player);
+                Player player = new Player(i, false);
+                players.add(player);
 
                 connections.put(player, socket);
                 inputStreams.put(player, in);
                 outputStreams.put(player, out);
 
-                System.out.printf("Connected to Player %d%n", playerId + 1);
-                out.writeObject("You connected as Player " + (playerId + 1));
+                System.out.printf("Connected to Player %d%n", i + 1);
+                sendMessage(player, MessageType.DISPLAY_MESSAGE, "You connected as Player " + (i + 1));
             }
         }
     }
