@@ -106,8 +106,8 @@ public final class ScoreCalculator {
         return winner;
     }
     public static int calculateThrowCatchScore(List<Card> draft) {
-        int firstCardNumber = draft.getFirst().number();
-        int lastCardNumber = draft.getLast().number();
+        int firstCardNumber = draft.getFirst().throwCatchValue();
+        int lastCardNumber = draft.getLast().throwCatchValue();
 
         return Math.abs(firstCardNumber - lastCardNumber);
     }

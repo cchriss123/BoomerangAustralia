@@ -4,7 +4,7 @@ public record Card(
         String name,
         String letter,
         String region,
-        int number,
+        int throwCatchValue,
         String collections,
         String animals,
         String activities
