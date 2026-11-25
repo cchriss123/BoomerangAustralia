@@ -5,7 +5,7 @@ A multiplayer, terminal-based implementation of the Boomerang Australia
 card game using Java and TCP. Supports 2–4 human players and bots combined.
 
 ## Requirements
-- Java JDK 22
+- Java JDK 22 ([Download here](https://jdk.java.net/archive/))
 - IntelliJ IDEA (for unit testing)
 - JUnit 5.11.4
 
