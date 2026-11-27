@@ -24,4 +24,18 @@ public final class RegionChecker {
 
         return collectedSites.size() == 4;
     }
+// TODO EU - Passport Bonus
+// public static boolean hasVisitedAllRegions(Map<String, String> visitedSites, List<Card> draft,Set<String> allRegions) {
+//
+//     Set<String> visitedRegions = new HashSet<>(visitedSites.values());
+//
+//     for (Card card : draft) {
+//         visitedRegions.add(card.region());
+//     }
+//
+//     return visitedRegions.containsAll(allRegions);
+// }
+
+
+
 }

@@ -15,6 +15,10 @@ public class BoomerangAustralia {
     private static final int DRAFTING_TURNS = CARDS_PER_HAND - 1;
     private static final int NUMBER_OF_ROUNDS = 4;
 
+    //TODO EU
+    //private final RuleSet ruleSet;
+
+
     public static void main(String[] args) {
 
         if (args.length == 0) { // connect to local host as a guest client
@@ -246,6 +250,13 @@ public class BoomerangAustralia {
             for (int round = 0; round < NUMBER_OF_ROUNDS; round++) {
                 draftRound();
                 updateCompletedRegions(regions, finishedRegions);
+
+
+                //TODO EUROPE  */
+//                if (ruleSet == EUROPE) {
+//                    awardPassportBonus(regions);
+//                }
+
                 scorePlayers();
                 announceCompletedRegions(finishedRegions);
 
@@ -420,4 +431,43 @@ public class BoomerangAustralia {
                     "The following regions have now been completed: " + finishedRegions);
         }
     }
+
+
+// TODO EU
+// private void awardPassportBonus(Set<String> regions) {
+//     int previousWinners = 0;
+//
+//     for (Player player : players) {
+//         if (player.getPassportBonus() > 0) {
+//             previousWinners++;
+//         }
+//     }
+//
+//     int bonus = switch (previousWinners) {
+//         case 0 -> 7;
+//         case 1 -> 3;
+//         case 2 -> 1;
+//         default -> 0;
+//     };
+//
+//     if (bonus == 0) {
+//         return;
+//     }
+//
+//     for (Player player : players) {
+//         if (player.getPassportBonus() == 0 &&
+//                 RegionChecker.hasVisitedAllRegions(
+//                         player.getSites(),
+//                         player.getDraft(),
+//                         regions)) {
+//
+//             player.setPassportBonus(bonus);
+//
+//             gameServer.sendMessage(player,
+//                     MessageType.DISPLAY_MESSAGE,
+//                     "Passport Bonus: " + bonus + " points");
+//         }
+//     }
+// }
+
 }

@@ -14,6 +14,8 @@ public class Player {
     private final Map<String, Integer> activitiesScore = new HashMap<>();
     private int regionRoundScore = 0;
     private int finalScore = 0;
+    //TODO EUROPE
+    // private int passportBonus = 0;
 
     public Player(int playerID, boolean isBot) {
         this.playerID = playerID;

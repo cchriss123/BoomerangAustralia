@@ -1,7 +1,4 @@
-import model.Animals;
-import model.Card;
-import model.CollectionTypes;
-import model.Player;
+import model.*;
 
 import java.util.List;
 import java.util.Map;
@@ -87,6 +84,44 @@ public final class ScoreCalculator {
         return ACTIVITY_POINTS_BY_FREQUENCY.getOrDefault(frequency, 0);
     }
 
+
+    public static Player getHighestScoringPlayer(
+            List<Player> players, RuleSet ruleSet) {
+
+        Player winner = players.getFirst();
+
+        for (Player player : players) {
+            if (player.getFinalScore() > winner.getFinalScore()) {
+                winner = player;
+
+            } else if (player.getFinalScore() == winner.getFinalScore()) {
+
+                // TODO Europe-specific tie-breaker
+//                if (ruleSet == RuleSet.EUROPE) {
+//                    if (player.getPassportBonus() > winner.getPassportBonus()) {
+//                        winner = player;
+//                        continue;
+//                    }
+//
+//                    if (player.getPassportBonus() < winner.getPassportBonus()) {
+//                        continue;
+//                    }
+//                }
+
+                // Common Throw and Catch tie-breaker
+                int playerThrowCatch = calculateTotal(player.getRScore(), "Throw and Catch score");
+                int winnerThrowCatch = calculateTotal(winner.getRScore(), "Throw and Catch score");
+
+                if (playerThrowCatch > winnerThrowCatch) {
+                    winner = player;
+                }
+            }
+        }
+
+        return winner;
+    }
+
+
     public static Player getHighestScoringPlayer(List<Player> players) {
         Player winner = players.getFirst();
 
@@ -119,7 +154,9 @@ public final class ScoreCalculator {
         return calculateFinalScore(
                 player.getRScore(),
                 player.getActivitiesScore(),
-                regionBonus);
+                regionBonus)
+                // +  player.getPassportBonus();
+                ;
     }
 
     public static int calculateRegionBonus(int completedRegions) {
